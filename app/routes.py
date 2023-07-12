@@ -1,9 +1,13 @@
+from flask import render_template
 from app import app
 
 @app.route('/')
 def home_route():
-    return '<h1>Welcome to the home page</h1>'
+    return render_template('index.html', title='Home')  
 
 @app.route('/login')
 def login_view():
-    return '<h2>Please login or register</h2>'
+    return render_template('login_register.html', title='Login')   
+
+
+    
