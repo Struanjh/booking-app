@@ -1,9 +1,11 @@
 
-from flask import Flask 
+from flask import Flask
+from config import Config
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-## placed at end to avoid circular imports -- routes needs access to app instance
+#avoid circular imports
 from app import routes
 
 
