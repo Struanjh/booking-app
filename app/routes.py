@@ -1,9 +1,10 @@
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
-from app import app
-from app.forms import LoginForm
-from app.models import User
+from datetime import datetime
+from app import app, db
+from app.forms import LoginForm, RegisterForm
+from app.models import User, Role
 
 @app.route('/')
 @login_required
@@ -28,12 +29,36 @@ def login():
         else:
             flash('Invalid email or password')
             return redirect(url_for('login'))
-    return render_template('login_register.html', title='Login', form=form)   
+    return render_template('login.html', title='Login', form=form)   
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = User(
+            email=form.email.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            join_date=datetime.utcnow,
+            oauth=False
+        )
+        user.role_id=Role.query.filter_by(role='user').first().id
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Account successfully created')
+        return redirect(url_for('register'))
+    return render_template('register.html', title='Register', form=form)
+
+
 
 
 
