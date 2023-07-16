@@ -11,10 +11,17 @@
     {% endif %}
 </head>
 <body>
+    <h2>
+    Hello {{ current_user.email }}
+    </h2>
     <header>
         <ul>
             <li><a href="{{ url_for('home') }}">Home</a></li>
+            {% if current_user.is_anonymous %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% else %}
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% endif %}
         </ul>
     </header>
     {% with messages = get_flashed_messages() %}

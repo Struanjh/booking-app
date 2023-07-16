@@ -1,6 +1,9 @@
 
 from app import db
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from app import login
 
 
 class Role(db.Model):
@@ -9,7 +12,7 @@ class Role(db.Model):
     role = db.Column(db.String(64), nullable=False)
     users = db.Relationship('User', backref='role')
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64))
@@ -23,6 +26,18 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
+        
+    def set_password(self, pw):
+        self.pw_hash = generate_password_hash(pw)
+
+    def check_password(self, pw):
+        return check_password_hash(self.pw_hash, pw)
+
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 class Classes(db.Model):
