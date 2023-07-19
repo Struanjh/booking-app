@@ -1,10 +1,11 @@
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 from app import app, db
 from app.forms import LoginForm, RegisterForm
-from app.models import User, Role
+from app.models import User, Role, EnglishClasses
 
 @app.route('/')
 @login_required
@@ -59,8 +60,17 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
+@app.route('/bookings')
+def bookings():
+    classes = EnglishClasses.query.all()
+    return render_template('bookings.html', title='Bookings', classes=classes)
+    
+    def nextTenDates(numdays):
+        dayOne = datetime.now(pytz.timezone('Asia/Seoul'))
+        date_range = [dayOne - timedelta(days=x) for x in range(numdays)]
+        print(dayOne, date_range)
 
-
-
+    def getMinMaxUtc():
+        pass
 
     

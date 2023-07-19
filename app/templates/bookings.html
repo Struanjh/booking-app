@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for class in classes %}
+    <div>{{ class }}</div>
+    <div>There are {{ class.students.count() }} students signed up for this class</div>
+    {% endfor %}
+{% endblock %}
