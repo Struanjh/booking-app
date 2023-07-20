@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime, timedelta
@@ -32,6 +32,7 @@ def login():
             return redirect(url_for('login'))
     return render_template('login.html', title='Login', form=form)   
 
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -41,7 +42,7 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
@@ -61,10 +62,11 @@ def register():
 
 
 @app.route('/bookings')
+@login_required
 def bookings():
     classes = EnglishClasses.query.all()
     return render_template('bookings.html', title='Bookings', classes=classes)
-    
+
     def nextTenDates(numdays):
         dayOne = datetime.now(pytz.timezone('Asia/Seoul'))
         date_range = [dayOne - timedelta(days=x) for x in range(numdays)]
@@ -73,4 +75,35 @@ def bookings():
     def getMinMaxUtc():
         pass
 
+
+@app.route('/makebooking', methods=['POST'])
+@login_required
+def makeBooking():
+    MAX_STUDENTS = 10
+    data = request.get_json()
+    classId = int(data['classId'])
+    targetClass = EnglishClasses.query.get(classId)
+    studentCount = targetClass.students.count()
+    if studentCount >= MAX_STUDENTS:
+        msg = 'This class is fully booked'
+    elif current_user.classes.filter_by(id=classId).first():
+        msg = 'Already signed up for this class'
+    else:
+        targetClass.students.add(current_user)
+        db.session.commit()
+        msg = 'You have signed up for the class'
+    return jsonify(
+            {
+                'message': msg,
+                'studentCount': studentCount
+            }
+        )
+
+
+
+@app.route('/cancelbooking', methods=['POST'])
+def cancelBooking():
+    pass
     
+
+

@@ -1,8 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% for class in classes %}
-    <div>{{ class }}</div>
-    <div>There are {{ class.students.count() }} students signed up for this class</div>
-    {% endfor %}
+    <div id="available-classes">
+        {% for class in classes %}
+            <div class="class-id" data-class-id="{{ class.id }}">{{ class }}
+                <div class="student-count" data-student-count="{{ class.students.count() }}">There are {{ class.students.count() }} students signed up for this class</div>
+                <button class="makebooking">Book the class</button>
+                <button class="cancelbooking">Cancel booking</button>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const availableClassesContainer = document.getElementById('available-classes');
+        const manageBookings = async e => {
+            if(e.target.nodeName === "BUTTON") {
+                const action = e.target.className;
+                if(action === 'makebooking' || action === 'cancelbooking') {
+                    const classId = e.target.parentElement.dataset.classId;
+                    const studentCount = e.target.parentElement.firstElementChild.dataset.studentCount;
+                    const res = await fetch(
+                        `/${action}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({classId: classId})
+                        }
+                    )
+                    const data = await res.json();
+                    console.log(data);
+                }
+            }
+        }
+        availableClassesContainer.addEventListener('click', manageBookings);
+    </script>
 {% endblock %}
