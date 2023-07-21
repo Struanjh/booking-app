@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Welcome to the home page</h1>
+<img src="../static/home_img.jpg" alt="english study" width="500" height="300">
+{% if current_user.is_anonymous %}
+<h3>Welcome to the English cafe. Please login or register to view available classes and bookings</h3>
+{% else %}
+<h3>Welcome {{ current_user.first_name }}</h3>
+{% endif %}
 {% endblock %}

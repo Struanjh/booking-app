@@ -1,2 +1,2 @@
 FLASK_APP=booking_app.py
-DEBUG=true
+FLASK_DEBUG=true

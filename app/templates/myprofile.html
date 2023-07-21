@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+<!--If Admin then other fields will be available to Edit (like override PW)-->
+
+{% block content %}
+
+<div class="user-info">
+    <p>ID: {{ user.id }}</p>
+    <p>First Name: {{ user.first_name }}</p>
+    <p>Last Name: {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Join Date: {{ user.join_date }}</p>
+    <p>Last Login: {{ user.last_login }}</p>
+</div>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.first_name.label }} <br>
+        {{ form.first_name() }} <br>
+        {% for error in form.first_name.errors %}
+        <span>{{ error }}</span>
+        {% endfor %}
+     </p>
+    <p>
+       {{ form.last_name.label }} <br>
+       {{ form.last_name() }} <br>
+       {% for error in form.last_name.errors %}
+       <span>{{ error }}</span>
+       {% endfor %}
+    </p>
+    <p>
+       {{ form.email.label }} <br>
+       {{ form.email() }} <br>
+       {% for error in form.email.errors %}
+       <span>{{ error }}</span>
+       {% endfor %}
+    </p>
+    <p>
+        {{ form.submit() }}
+    </p>
+</form>
+
+{% endblock %}

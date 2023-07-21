@@ -4,11 +4,10 @@ from werkzeug.urls import url_parse
 from datetime import datetime, timedelta
 import pytz
 from app import app, db
-from app.forms import LoginForm, RegisterForm
+from app.forms import LoginForm, RegisterForm, EditProfileForm
 from app.models import User, Role, EnglishClasses
 
 @app.route('/')
-@login_required
 def home():
     return render_template('index.html', title='Home')  
 
@@ -102,8 +101,37 @@ def makeBooking():
 
 
 @app.route('/cancelbooking', methods=['POST'])
+@login_required
 def cancelBooking():
-    pass
+    data = request.get_json()
+    classId = int(data['classId'])
+    targetClass = EnglishClasses.query.get(classId)
+    if not current_user.classes.filter_by(id=classId).first():
+        msg = 'You have not booked this class yet'
+    else:
+        targetClass.students.remove(current_user)
+        db.session.commit()
+        msg = 'Booking cancelled'
+    return jsonify(
+        {
+            message: msg,
+            studentCount: targetClass.students.count()
+        }
+    )
     
 
+@app.route('/mybookings')
+@login_required
+def myBookings():
+    userClasses = current_user.classes.all()
+    return render_template('mybookings.html', userClasses=userClasses, currtime = datetime.utcnow())
 
+@app.route('/myprofile/<int:id>')
+@login_required
+def myProfile(id):
+    form = EditProfileForm()
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        flash('User not found')
+        return redirect(url_for('home'))
+    return render_template('myprofile.html', user=user, form=form)
