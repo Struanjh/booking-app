@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime, timedelta
 import pytz
 from app import app, db
-from app.forms import LoginForm, RegisterForm, EditProfileForm
+from app.forms import LoginForm, RegisterForm, UserProfileForm
 from app.models import User, Role, EnglishClasses
 
 @app.route('/')
@@ -20,7 +20,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            ##Handle next query param passed when user has been redirected from a route protected by login_required
+            user.last_login = datetime.utcnow()
+            db.session.add(user)
+            db.session.commit()
+            ##Next param contains url user tried to access when redirected from a route protected by login_required
             next_page = request.args.get('next')
             ##Only allow redirects to same domain as this site
             if not next_page or url_parse(next_page).netloc != '':
@@ -48,7 +51,7 @@ def register():
             email=form.email.data,
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            join_date=datetime.utcnow,
+            join_date=datetime.utcnow(),
             oauth=False
         )
         user.role_id=Role.query.filter_by(role='user').first().id
@@ -126,12 +129,30 @@ def myBookings():
     userClasses = current_user.classes.all()
     return render_template('mybookings.html', userClasses=userClasses, currtime = datetime.utcnow())
 
-@app.route('/myprofile/<int:id>')
+
+@app.route('/userprofile', methods=['GET', 'POST'])
 @login_required
-def myProfile(id):
-    form = EditProfileForm()
-    user = User.query.filter_by(id=id).first()
+def userProfile():
+    ##If admin - query user model using the query param provided ID
+    user = User.query.filter_by(id=current_user.id).first()
     if not user:
         flash('User not found')
         return redirect(url_for('home'))
-    return render_template('myprofile.html', user=user, form=form)
+    form = UserProfileForm()
+    if request.method == 'GET':
+        form.id.data = user.id
+        form.join_date.data = user.join_date
+        form.last_login.data = user.last_login
+        form.first_name.data = user.first_name
+        form.last_name.data = user.last_name
+        form.email.data = user.email
+    else:
+        if form.validate_on_submit():
+            user.first_name = form.first_name.data
+            user.last_name = form.last_name.data 
+            user.email = form.email.data
+            db.session.add(user)
+            db.session.commit()
+            flash('Profile updated')
+            return redirect(url_for('userProfile',id=current_user.id))
+    return render_template('userprofile.html', user=user, form=form)

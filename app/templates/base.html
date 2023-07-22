@@ -20,7 +20,7 @@
             {% else %}
             <li><a href="{{ url_for('bookings')}}">Make a booking</a></li>
             <li><a href="{{ url_for('myBookings') }}">View my bookings</a></li>
-            <li><a href="{{ url_for('myProfile', id=current_user.id)}}">View my profile</a></li>
+            <li><a href="{{ url_for('userProfile', id=current_user.id)}}">View my profile</a></li>
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
             {% endif %}
         </ul>
