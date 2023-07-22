@@ -163,3 +163,6 @@ def userProfile():
 
     
 
+@app.route('/test')
+def test():
+    pass

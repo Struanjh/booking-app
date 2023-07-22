@@ -1,21 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="filters">
+    <button id="upcoming">Upcoming Classes</button>
+    <button id="completed">Completed Classes</button>
+</div>
 <div class="user-bookings">
 {% if userClasses %}
 {% for class in userClasses %}
-    <div data-class-id="{{ class.id }}">
+    <div class="class" data-class-complete="{{ currtime > class.end_time }}" data-class-id="{{ class.id }}">
+        <p>ID {{ class.id }}</p>
         <p>Start Time: {{ class.start_time}} </p>
         <p>End Time: {{ class.end_time}} </p>
-        {% if currtime > class.end_time %}
-        <p>Class Finished</p>
-        {% else %}
-        <p>Class upcoming</p>
-        {% endif %}
     </div>
 {% endfor %}
 {% else %}
 <p>No bookings yet</p>
 {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    const upcomingBtn = document.getElementById('upcoming');
+    const completedBtn = document.getElementById('completed');
+    const classes = document.querySelectorAll('.class')
+    upcomingBtn.addEventListener('click', e => {
+        for(let i=0; i < classes.length; i++) {
+            if(classes[i].dataset.classComplete === "True") {
+                classes[i].style.display = 'none';
+            } else {
+                classes[i].style.display = 'block';
+            }
+        }
+        upcomingBtn.style.backgroundColor = 'green'
+        completedBtn.style.backgroundColor = ''
+    });
+    completedBtn.addEventListener('click', e => {
+        for(let i=0; i < classes.length; i++) {
+            if(classes[i].dataset.classComplete === "False") {
+                classes[i].style.display = 'none';
+            } else {
+                classes[i].style.display = 'block';
+            }
+        }
+        completedBtn.style.backgroundColor = 'green'
+        upcomingBtn.style.backgroundColor = ''
+    });
+</script>
 {% endblock %}

@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime, index=True)
     oauth = db.Column(db.Boolean)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    ##ARGS -> 1-other side of many to many relationship. 2-assoc table, 3-reference used for this model from other side of many-many
+    #ARGS -> 1-other side of many to many relationship. 2-assoc table, 3-reference used for this model from other side of many-many
     classes = db.Relationship(
         'EnglishClasses',
         secondary=class_bookings,
@@ -47,7 +47,6 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.pw_hash, pw)
 
 
-
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -61,5 +60,6 @@ class EnglishClasses(db.Model):
 
     def __repr__(self):
         return '<Class starts {} and finishes {}>'.format(self.start_time, self.end_time)
+
 
 
