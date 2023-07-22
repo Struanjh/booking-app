@@ -133,11 +133,15 @@ def myBookings():
 @app.route('/userprofile', methods=['GET', 'POST'])
 @login_required
 def userProfile():
-    ##If admin - query user model using the query param provided ID
-    user = User.query.filter_by(id=current_user.id).first()
-    if not user:
-        flash('User not found')
-        return redirect(url_for('home'))
+    print(current_user.role.role)
+    if current_user.role.role == 'admin':
+        id = int(request.get('id'))
+        user = User.query.filter_by(id=id).first()
+        if not user:
+            flash('User not found')
+            return redirect(url_for('home'))
+    else:
+        user = User.query.filter_by(id=current_user.id).first()
     form = UserProfileForm()
     if request.method == 'GET':
         form.id.data = user.id
@@ -156,3 +160,6 @@ def userProfile():
             flash('Profile updated')
             return redirect(url_for('userProfile',id=current_user.id))
     return render_template('userprofile.html', user=user, form=form)
+
+    
+
