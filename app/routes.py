@@ -86,6 +86,7 @@ def makeBooking():
     classId = int(data['classId'])
     targetClass = EnglishClasses.query.get(classId)
     studentCount = targetClass.students.count()
+    state = ''
     if studentCount >= MAX_STUDENTS:
         msg = 'This class is fully booked'
     elif current_user.classes.filter_by(id=classId).first():
@@ -93,11 +94,14 @@ def makeBooking():
     else:
         targetClass.students.add(current_user)
         db.session.commit()
+        studentCount += 1
+        state = 'ADDED'
         msg = 'You have signed up for the class'
     return jsonify(
             {
                 'message': msg,
-                'studentCount': studentCount
+                'studentCount': studentCount,
+                'state': state
             }
         )
 
@@ -109,16 +113,19 @@ def cancelBooking():
     data = request.get_json()
     classId = int(data['classId'])
     targetClass = EnglishClasses.query.get(classId)
+    state = ''
     if not current_user.classes.filter_by(id=classId).first():
         msg = 'You have not booked this class yet'
     else:
         targetClass.students.remove(current_user)
         db.session.commit()
         msg = 'Booking cancelled'
+        state = 'REMOVED'
     return jsonify(
         {
-            message: msg,
-            studentCount: targetClass.students.count()
+            'message': msg,
+            'studentCount': targetClass.students.count(),
+            'state': state
         }
     )
     

@@ -5,8 +5,12 @@
         {% for class in classes %}
             <div class="class-id" data-class-id="{{ class.id }}">{{ class }}
                 <div class="student-count" data-student-count="{{ class.students.count() }}">There are {{ class.students.count() }} students signed up for this class</div>
-                <button class="makebooking">Book the class</button>
+                {% if class.students.filter_by(id=current_user.id).first() %}
                 <button class="cancelbooking">Cancel booking</button>
+                {% else %}
+                <button class="makebooking">Book the class</button>
+                {% endif %}
+                <div class="message"></div>
             </div>
         {% endfor %}
     </div>
@@ -18,10 +22,14 @@
         const availableClassesContainer = document.getElementById('available-classes');
         const manageBookings = async e => {
             if(e.target.nodeName === "BUTTON") {
-                const action = e.target.className;
+                const btn = e.target;
+                const action = e.target.className
                 if(action === 'makebooking' || action === 'cancelbooking') {
                     const classId = e.target.parentElement.dataset.classId;
-                    const studentCount = e.target.parentElement.firstElementChild.dataset.studentCount;
+                    const studentCount = [...e.target.parentElement.children]
+                    .filter(elem => elem.classList.contains("student-count"))[0]
+                    const msg = [...e.target.parentElement.children]
+                    .filter(elem => elem.classList.contains("message"))[0]
                     const res = await fetch(
                         `/${action}`,
                         {
@@ -30,11 +38,24 @@
                             body: JSON.stringify({classId: classId})
                         }
                     )
-                    const data = await res.json();
-                    console.log(data);
+                    if(res.ok) {
+                        const data = await res.json();
+                        studentCount.textContent = `There are ${data.studentCount} students signed up for this class`;
+                        msg.textContent = `${data.message}`;
+                        if(data.state == 'ADDED') {
+                            btn.className = 'cancelbooking';
+                            btn.textContent = 'Cancel Booking';
+                        } else if (data.state === 'REMOVED') {
+                            btn.className = 'makebooking';
+                            btn.textContent = 'Book the class';
+                    } else {
+                        console.log('Some kind of problem');
+                        msg.textContent = `There was an issue connecting to the server`;
+                    }
                 }
             }
         }
+    }
         availableClassesContainer.addEventListener('click', manageBookings);
     </script>
 {% endblock %}
