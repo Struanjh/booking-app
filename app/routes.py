@@ -140,7 +140,6 @@ def myBookings():
 @app.route('/userprofile', methods=['GET', 'POST'])
 @login_required
 def userProfile():
-    print(current_user.role.role)
     if current_user.role.role == 'admin':
         id = int(request.get('id'))
         user = User.query.filter_by(id=id).first()
@@ -167,8 +166,6 @@ def userProfile():
             flash('Profile updated')
             return redirect(url_for('userProfile',id=current_user.id))
     return render_template('userprofile.html', user=user, form=form)
-
-    
 
 @app.route('/test')
 def test():

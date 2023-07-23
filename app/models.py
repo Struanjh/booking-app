@@ -1,9 +1,11 @@
 
-from app import db
+from app import app, db, login
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
-from app import login
+from flask import redirect, url_for
+from flask_login import UserMixin, current_user
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import AdminIndexView, Admin
 
 ## ASSOC TABLE TO MANAGE MANY-MANY RELATIONSHIP BETWEEN CLASSES AND USERS
 class_bookings = db.Table(
@@ -61,5 +63,14 @@ class EnglishClasses(db.Model):
     def __repr__(self):
         return '<Class starts {} and finishes {}>'.format(self.start_time, self.end_time)
 
+class MyAdminIndexView(AdminIndexView):
+    def is_accessible(self):
+        return current_user.role.role == 'user'
+    
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('home'))
 
-
+admin = Admin(app, index_view=MyAdminIndexView())
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(EnglishClasses, db.session))
+admin.add_view(ModelView(Role, db.session))
