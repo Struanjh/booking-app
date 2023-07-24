@@ -43,6 +43,7 @@ class User(UserMixin, db.Model):
         'EnglishClasses',
         secondary=class_bookings,
         backref=db.backref('students_not_dynamic'),
+        viewonly=True
     )
 
 
