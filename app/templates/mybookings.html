@@ -9,9 +9,10 @@
 {% if userClasses %}
 {% for class in userClasses %}
     <div class="class" data-class-complete="{{ currtime > class.end_time }}" data-class-id="{{ class.id }}">
-        <p>ID {{ class.id }}</p>
-        <p>Start Time: {{ class.start_time}} </p>
-        <p>End Time: {{ class.end_time}} </p>
+        <p>Class ID: {{ class.id }}</p>
+        <!-- <p>Start Time: {{ class.start_time}} </p> -->
+        <p>Class Start Time: {{ moment(class.start_time).format('LLL') }}</p>
+        <p>Class Finish Time: {{ moment(class.end_time).format('LLL') }}</p>  
     </div>
 {% endfor %}
 {% else %}
