@@ -1,7 +1,6 @@
 from app import app, db
 from flask import redirect, url_for
 from app.models import User, EnglishClasses, Role
-from wtforms import StringField, PasswordField
 from flask_login import current_user
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import AdminIndexView, Admin
