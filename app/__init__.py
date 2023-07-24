@@ -15,21 +15,8 @@ mail = Mail(app)
 login = LoginManager(app)
 login.login_view = 'login'
 
-# from flask_admin.contrib.sqla import ModelView
-# from flask_admin import Admin, AdminIndexView
-
-# class MyAdminIndexView(AdminIndexView):
-#     def is_accessible(self):
-#         return current_user.role.role == 'admin'
-    
-#     def inaccessible_callback(self, name, **kwargs):
-#         return redirect(url_for('home'))
-
-# admin = Admin(app, index_view=MyAdminIndexView())
-# admin.add_view(ModelView(models.User, db.session))
-
 #avoid circular imports
-from app import routes, models
+from app import routes, models, admin
 
 
 

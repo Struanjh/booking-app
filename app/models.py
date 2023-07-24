@@ -4,8 +4,6 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect, url_for
 from flask_login import UserMixin, current_user
-from flask_admin.contrib.sqla import ModelView
-from flask_admin import AdminIndexView, Admin
 
 ## ASSOC TABLE TO MANAGE MANY-MANY RELATIONSHIP BETWEEN CLASSES AND USERS
 class_bookings = db.Table(
@@ -19,6 +17,9 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(64), nullable=False)
     users = db.Relationship('User', backref='role')
+
+    def __repr__(self):
+        return '<Role: {}>'.format(self.role)
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -38,6 +39,12 @@ class User(UserMixin, db.Model):
         backref=db.backref('students', lazy='dynamic'),
         lazy='dynamic'
     )
+    classes_not_dynamic = db.Relationship(
+        'EnglishClasses',
+        secondary=class_bookings,
+        backref=db.backref('students_not_dynamic'),
+    )
+
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
@@ -61,16 +68,4 @@ class EnglishClasses(db.Model):
     end_time = db.Column(db.DateTime)
 
     def __repr__(self):
-        return '<Class starts {} and finishes {}>'.format(self.start_time, self.end_time)
-
-class MyAdminIndexView(AdminIndexView):
-    def is_accessible(self):
-        return current_user.role.role == 'user'
-    
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('home'))
-
-admin = Admin(app, index_view=MyAdminIndexView())
-admin.add_view(ModelView(User, db.session))
-admin.add_view(ModelView(EnglishClasses, db.session))
-admin.add_view(ModelView(Role, db.session))
+        return '<Class ID: {}>'.format(self.id)
