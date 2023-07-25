@@ -3,7 +3,7 @@ import secrets
 import requests
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
-from flask import render_template, flash, redirect, url_for, request, jsonify
+from flask import render_template, flash, redirect, url_for, request, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
@@ -56,8 +56,8 @@ def register():
             last_name=form.last_name.data,
             join_date=datetime.utcnow(),
             oauth=False
-            role_id=Role.query.filter_by(role='user').first().id
         )
+        user.role_id=Role.query.filter_by(role='user').first().id
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -84,13 +84,13 @@ def bookings():
 @app.route('/makebooking', methods=['POST'])
 @login_required
 def makeBooking():
-    MAX_STUDENTS = 10
+    # MAX_STUDENTS = 10
     data = request.get_json()
     classId = int(data['classId'])
     targetClass = EnglishClasses.query.get(classId)
     studentCount = targetClass.students.count()
     state = ''
-    if studentCount >= MAX_STUDENTS:
+    if studentCount >= MAX_CLASS_SIZE:
         msg = 'This class is fully booked'
     elif current_user.classes.filter_by(id=classId).first():
         msg = 'Already signed up for this class'
@@ -237,6 +237,7 @@ def oauth2_callback(provider):
         abort(401)
 
     oauth2_token = response.json().get('access_token')
+    print(oauth2_token)
 
     if not oauth2_token:
         abort(401)
@@ -248,27 +249,40 @@ def oauth2_callback(provider):
     })
     if response.status_code != 200:
         abort(401)
-    email = provider_data['userinfo']['email'](response.json())
+    res_data = response.json()
+    print(res_data)
+    first_name = res_data['given_name']
+    last_name = res_data['family_name']
+    email = res_data['email'].lower()
+    print(first_name, last_name, email)
+    # email = provider_data['userinfo']['email'](response.json())
+    # print(email)
     
-    ##Find current user
+    # ##Find current user
     oauth_user = User.query.filter_by(email=email).first()
+    print('Oauth User...')
+    print(oauth_user)
 
     ##Check in case user has already registered with that email as regular user
     if oauth_user and oauth_user.oauth == False:
-        abort(401)
+        print("USER ALREADY REGISTERED WITH REGULAR ACCOUNT")
+        flash(f'You have already registered the email {email}. Please login with your email and password')
+        return redirect(url_for('home'))
 
     ##First time user so create record
     if not oauth_user:
         oauth_user = User(
-            first_name = 'null'
-            last_name = 'null'
+            first_name = first_name,
+            last_name = last_name,
             email = email,
             pw_hash = None,
             join_date = datetime.utcnow(),
             oauth = True,
             role_id = Role.query.filter_by(role='user').first().id
         )
+        print("NEW ACCOUNT WOULD JUST HAVE BEEN CREATED")
     oauth_user.last_login = datetime.utcnow()
+    print("USER READY TO BE LOGGED IN....")
     db.session.add(oauth_user)
     db.session.commit()
     login_user(oauth_user)

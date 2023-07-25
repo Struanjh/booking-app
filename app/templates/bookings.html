@@ -4,7 +4,9 @@
     <div id="available-classes">
         {% for class in classes %}
             <div class="class-id" data-class-id="{{ class.id }}">{{ class }}
-                <div class="student-count" data-student-count="{{ class.students.count() }}">There are {{ class.students.count() }} students signed up for this class</div>
+                <div class="student-count" data-student-count="{{ class.students.count() }}">
+                    There are {{ class.students.count() }} students signed up for this class
+                </div>
                 {% if class.students.filter_by(id=current_user.id).first() %}
                 <button class="cancelbooking">Cancel booking</button>
                 {% else %}

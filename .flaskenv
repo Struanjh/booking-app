@@ -1,2 +1,3 @@
 FLASK_APP=booking_app.py
 FLASK_DEBUG=true
+MAX_CLASS_SIZE=10

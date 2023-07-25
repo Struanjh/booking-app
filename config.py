@@ -21,6 +21,9 @@ class Config(object):
                 'url': 'https://www.googleapis.com/oauth2/v3/userinfo',
                 'email': lambda json: json['email'],
             },
-            'scopes': ['https://www.googleapis.com/auth/userinfo.email']
+            'scopes': [
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile'
+            ]
         }
     }
