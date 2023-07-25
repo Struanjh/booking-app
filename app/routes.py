@@ -1,8 +1,11 @@
+import pytz
+import secrets
+import requests
+from urllib.parse import urlencode
+from datetime import datetime, timedelta
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
-from datetime import datetime, timedelta
-import pytz
 from app import app, db
 from app.forms import LoginForm, RegisterForm, UserProfileForm
 from app.models import User, Role, EnglishClasses
@@ -48,13 +51,13 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
-            email=form.email.data,
+            email=form.email.data.lower(),
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             join_date=datetime.utcnow(),
             oauth=False
+            role_id=Role.query.filter_by(role='user').first().id
         )
-        user.role_id=Role.query.filter_by(role='user').first().id
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -163,3 +166,110 @@ def userProfile():
 @app.route('/test')
 def test():
     pass
+
+##Initiate oauth process by redirecting app to oauth providers authorization endpoint
+@app.route('/authorize/<provider>')
+def oauth2_authorize(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('index'))
+    
+    ##Select relevant oauth provider from config dictionary
+    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
+    if provider_data is None:
+        abort(404)
+    
+    # generate a random string for the state parameter
+    session['oauth2_state'] = secrets.token_urlsafe(16)
+
+    ## Prepare query params then redirect user to the Oauth provider auth endpoint
+    params = urlencode({
+        'client_id': provider_data['client_id'],
+        'redirect_uri': url_for('oauth2_callback', provider=provider,
+                                _external=True),
+        'response_type': 'code',
+        'scope': ' '.join(provider_data['scopes']),
+        'state': session['oauth2_state'],
+    })
+
+    # redirect the user to the OAuth2 provider authorization URL
+    return redirect(provider_data['authorize_url'] + '?' + params)
+
+##Process reponse from oauth provider, login and create user if needed
+@app.route('/callback/<provider>')
+def oauth2_callback(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('index'))
+
+    provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
+    if provider_data is None:
+        abort(404)
+    
+    # if there was an authentication error, flash the error messages and exit
+    if 'error' in request.args:
+        for k, v in request.args.items():
+            if k.startswith('error'):
+                flash(f'{k}: {v}')
+        return redirect(url_for('index'))
+
+    # make sure that the state parameter matches the one created in the authorization request
+    if request.args['state'] != session.get('oauth2_state'):
+        abort(401)
+
+    # make sure that the authorization code is present
+    if 'code' not in request.args:
+        abort(401)
+    
+     # Make a POST req to oauth provider to exhcange auth code for access token
+    response = requests.post(
+        provider_data['token_url'], 
+        data = {
+            'client_id': provider_data['client_id'],
+            'client_secret': provider_data['client_secret'],
+            'code': request.args['code'],
+            'grant_type': 'authorization_code',
+            'redirect_uri': url_for('oauth2_callback', provider=provider,
+                                    _external=True),
+        },
+        headers={'Accept': 'application/json'}
+    )
+
+    if response.status_code != 200:
+        abort(401)
+
+    oauth2_token = response.json().get('access_token')
+
+    if not oauth2_token:
+        abort(401)
+    
+    # GET req to oauth provider to retrieve users email address
+    response = requests.get(provider_data['userinfo']['url'], headers={
+        'Authorization': 'Bearer ' + oauth2_token,
+        'Accept': 'application/json',
+    })
+    if response.status_code != 200:
+        abort(401)
+    email = provider_data['userinfo']['email'](response.json())
+    
+    ##Find current user
+    oauth_user = User.query.filter_by(email=email).first()
+
+    ##Check in case user has already registered with that email as regular user
+    if oauth_user and oauth_user.oauth == False:
+        abort(401)
+
+    ##First time user so create record
+    if not oauth_user:
+        oauth_user = User(
+            first_name = 'null'
+            last_name = 'null'
+            email = email,
+            pw_hash = None,
+            join_date = datetime.utcnow(),
+            oauth = True,
+            role_id = Role.query.filter_by(role='user').first().id
+        )
+    oauth_user.last_login = datetime.utcnow()
+    db.session.add(oauth_user)
+    db.session.commit()
+    login_user(oauth_user)
+    return redirect(url_for('home'))
