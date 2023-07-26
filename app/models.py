@@ -1,9 +1,11 @@
 
 from app import app, db, login
+from time import time
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect, url_for
 from flask_login import UserMixin, current_user
+import jwt
 
 ## ASSOC TABLE TO MANAGE MANY-MANY RELATIONSHIP BETWEEN CLASSES AND USERS
 class_bookings = db.Table(
@@ -46,15 +48,31 @@ class User(UserMixin, db.Model):
         viewonly=True
     )
 
-
-    def __repr__(self):
-        return '<User {}>'.format(self.email)
-
     def set_password(self, pw):
         self.pw_hash = generate_password_hash(pw)
 
     def check_password(self, pw):
         return check_password_hash(self.pw_hash, pw)
+    
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256'
+        )
+
+    ##Doesn't require class instance to be called
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
+
+
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
 
 
 @login.user_loader

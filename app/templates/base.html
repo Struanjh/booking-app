@@ -20,6 +20,10 @@
                 <a class="btn btn-primary" href="{{ url_for('oauth2_authorize', provider='google') }}">Login with Google</a>
             </li>
             <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li>
+                Forgot Your Password?
+                <a href="{{ url_for('reset_password_request') }}">Click to Reset It</a>
+            </li>
             {% else %}
                 {% if current_user.role.role == 'admin' %}
                 <li><a href="/admin">Admin</a></li>
