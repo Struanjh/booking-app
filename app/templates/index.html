@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block header %}
+{% include 'sub_templates/__header.html' %}
+{% endblock %}
+
 {% block content %}
 <img src="../static/home_img.jpg" alt="english study" width="500" height="300">
 {% if current_user.is_anonymous %}

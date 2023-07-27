@@ -1,0 +1,17 @@
+<header>
+    <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        {% if current_user.is_anonymous %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+        {% else %}
+            {% if current_user.role.role == 'admin' %}
+            <li><a href="/admin">Admin</a></li>
+            {% endif %}
+        <li><a href="{{ url_for('bookings')}}">Make a booking</a></li>
+        <li><a href="{{ url_for('myBookings') }}">View my bookings</a></li>
+        <li><a href="{{ url_for('userProfile', id=current_user.id)}}">View my profile</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% endif %}
+    </ul>
+</header>

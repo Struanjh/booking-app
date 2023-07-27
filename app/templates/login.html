@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block header %}
+{% include 'sub_templates/__header.html' %}
+{% endblock %}
+
 {% block content %}
 <h1>Welcome to the login page</h1>
 <form action="" method="post" novalidate>
@@ -26,4 +30,10 @@
         {{ form.submit() }}
     </p>
 </form>
+<p>
+    <a class="btn btn-primary" href="{{ url_for('oauth2_authorize', provider='google') }}">Login with Google</a>
+</p>
+<p>Forgot Your Password?
+    <a href="{{ url_for('reset_password_request') }}">Click to Reset It</a>
+</p>
 {% endblock %}

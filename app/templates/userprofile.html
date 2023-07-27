@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-<!--If Admin then other fields will be available to Edit (like override PW)-->
+{% block header %}
+{% include 'sub_templates/__header.html' %}
+{% endblock %}
 
 {% block content %}
 <form action="" method="post" novalidate>

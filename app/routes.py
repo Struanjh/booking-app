@@ -308,6 +308,7 @@ def reset_password(token):
     ##Static method so can be called directly from the class
     user = User.verify_reset_password_token(token)
     if not user:
+        flash('Reset Token expired or invalid')
         return redirect(url_for('home'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
