@@ -27,3 +27,14 @@ def send_password_reset_email(user):
                html_body=render_template('email/reset_password_email.html',
                                          user=user, token=token)
     )
+
+def send_account_confirmation_email(user):
+    token = user.get_account_confirmation_token()
+    send_email('Booking App Team: Confirm your email',
+               sender=app.config['ADMINS'][0],
+               recipients=[user.email],
+               text_body=render_template('email/confirm_account_email.txt',
+                                         user=user, token=token),
+               html_body=render_template('email/confirm_account_email.html',
+                                         user=user, token=token)
+    )

@@ -61,12 +61,28 @@ class User(UserMixin, db.Model):
             app.config['SECRET_KEY'], algorithm='HS256'
         )
 
+    def get_account_confirmation_token(self, expires_in=1440):
+        return jwt.encode(
+            {'confirm_account': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256'
+        )
+
     ##Doesn't require class instance to be called
     @staticmethod
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(token, app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
+
+    @staticmethod   
+    def verify_account_confirmation_token(token):
+        print(token)
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                            algorithms=['H256'])['confirm_account']
         except:
             return
         return User.query.get(id)

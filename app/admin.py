@@ -15,9 +15,9 @@ class MyAdminIndexView(AdminIndexView):
 
 class AdminUserView(ModelView):
     column_hide_backrefs = False
-    column_list = ['email', 'first_name', 'last_name', 'join_date', 'last_login', 'oauth', 'classes_not_dynamic', 'role']
+    column_list = ['email', 'first_name', 'last_name', 'join_date', 'last_login', 'pw_last_set', 'oauth', 'account_email_verified', 'classes_not_dynamic', 'role']
     column_searchable_list = ['email']
-    form_columns = ('email', 'first_name', 'last_name', 'join_date', 'last_login', 'oauth', 'classes', 'role')
+    form_columns = ('email', 'first_name', 'last_name', 'join_date', 'last_login', 'oauth', 'classes', 'role', 'account_email_verified')
     page_size = 50
     create_modal = True
     edit_modal = True

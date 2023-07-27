@@ -7,7 +7,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify, c
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.email import send_password_reset_email
+from app.email import send_password_reset_email, send_account_confirmation_email
 from app.forms import LoginForm, RegisterForm, UserProfileForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User, Role, EnglishClasses
 
@@ -22,7 +22,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
+        if user and user.check_password(form.password.data) and user.account_email_verified:
             login_user(user, remember=form.remember_me.data)
             user.last_login = datetime.utcnow()
             db.session.add(user)
@@ -33,6 +33,9 @@ def login():
             if not next_page or url_parse(next_page).netloc != '':
                 return redirect(url_for('home'))
             return redirect(next_page)
+        elif user and not user.account_email_verified:
+            flash('Please check your email inbox to verify your email')
+            return redirect(url_for('login'))
         else:
             flash('Invalid email or password')
             return redirect(url_for('login'))
@@ -56,14 +59,17 @@ def register():
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             join_date=datetime.utcnow(),
-            oauth=False
+            oauth=False,
+            account_email_verified=False,
+            pw_last_set=datetime.utcnow()
         )
         user.role_id=Role.query.filter_by(role='user').first().id
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Account successfully created')
-        return redirect(url_for('register'))
+        send_account_confirmation_email(user)
+        flash('Please check your email inbox. You need to verify your account to login')
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 
@@ -272,7 +278,9 @@ def oauth2_callback(provider):
                 pw_hash = None,
                 join_date = datetime.utcnow(),
                 oauth = True,
-                role_id = Role.query.filter_by(role='user').first().id
+                role_id = Role.query.filter_by(role='user').first().id,
+                account_email_verified=True,
+                pw_last_set=None
             )
 
         oauth_user.last_login = datetime.utcnow()
@@ -313,7 +321,22 @@ def reset_password(token):
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)
+        user.pw_last_set = datetime.utcnow()
         db.session.commit()
         flash('Your password has been reset. Please login with your new password')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/confirm_account/<token>')
+def confirm_account(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_account_confirmation_token(token)
+    if not user:
+        flash('Reset Token expired or invalid')
+        return redirect(url_for('login'))
+    user.account_email_verified=True
+    db.commit()
+    flash('Your account has been verified. Please login with your email and password')
+    return redirect(url_for('login'))
