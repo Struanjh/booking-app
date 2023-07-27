@@ -30,11 +30,12 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(64), index=True, unique=True)
     pw_hash = db.Column(db.String(128))
+    pw_last_set = db.Column(db.DateTime)
     join_date = db.Column(db.DateTime, index=True)
     last_login = db.Column(db.DateTime, index=True)
     oauth = db.Column(db.Boolean)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    #ARGS -> 1-other side of many to many relationship. 2-assoc table, 3-reference used for this model from other side of many-many
+    account_email_verified = db.Column(db.Boolean)
     classes = db.Relationship(
         'EnglishClasses',
         secondary=class_bookings,
