@@ -2,6 +2,7 @@ import pytz
 import secrets
 import requests
 from urllib.parse import urlencode
+
 from datetime import datetime, timedelta
 from flask import render_template, flash, redirect, url_for, request, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
@@ -10,6 +11,7 @@ from app import app, db
 from app.email import send_password_reset_email, send_account_confirmation_email
 from app.forms import LoginForm, RegisterForm, UserProfileForm, UserRequestForm, ResetPasswordForm
 from app.models import User, Role, EnglishClasses
+from app.password_policy import pw_policy
 
 @app.route('/')
 def home():
@@ -54,6 +56,11 @@ def register():
         return redirect(url_for('home'))
     form = RegisterForm()
     if form.validate_on_submit():
+        if not User.validate_password(form.password.data):
+            for requirement in pw_policy.test_password(form.password.data):
+                alert = f"{requirement.name} password requirement was not satisfied. Must be {requirement.requirement}"
+                flash(alert)
+                return redirect(url_for('register'))
         user = User(
             email=form.email.data.lower(),
             first_name=form.first_name.data,
@@ -114,6 +121,11 @@ def reset_password(token):
         return redirect(url_for('reset_password_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
+        if not User.validate_password(form.password.data):
+            for requirement in pw_policy.test_password(form.password.data):
+                alert = f"{requirement.name} password requirement was not satisfied. Must be {requirement.requirement}"
+            flash(alert)
+            return redirect(url_for('reset_password_request'))
         user.set_password(form.password.data)
         user.pw_last_set = datetime.utcnow()
         db.session.commit()

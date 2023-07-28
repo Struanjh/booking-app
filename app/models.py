@@ -1,5 +1,6 @@
 
 from app import app, db, login
+from app.password_policy import pw_policy
 from time import time
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,6 +25,7 @@ class Role(db.Model):
         return '<Role: {}>'.format(self.role)
 
 class User(UserMixin, db.Model):
+
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64))
@@ -54,19 +56,11 @@ class User(UserMixin, db.Model):
 
     def check_password(self, pw):
         return check_password_hash(self.pw_hash, pw)
-    
-    # def get_reset_password_token(self, expires_in=600):
-    #     return jwt.encode(
-    #         {'reset_password': self.id, 'exp': time() + expires_in},
-    #         app.config['SECRET_KEY'], algorithm='HS256'
-    #     )
 
-    # def get_account_confirmation_token(self, expires_in=1440):
-    #     return jwt.encode(
-    #         {'confirm_account': self.id, 'exp': time() + expires_in},
-    #         app.config['SECRET_KEY'], algorithm='HS256'
-    #     )
-    
+    @staticmethod
+    def validate_password(pw):
+        return pw_policy.validate(pw)
+        
     def get_token(self, expires_in, msg):
          return jwt.encode(
             {msg: self.id, 'exp': time() + expires_in},
@@ -81,28 +75,6 @@ class User(UserMixin, db.Model):
         except:
             return
         return User.query.get(id)
-
-
-    ##Doesn't require class instance to be called
-    # @staticmethod
-    # def verify_reset_password_token(token):
-    #     try:
-    #         id = jwt.decode(token, app.config['SECRET_KEY'],
-    #                         algorithms=['HS256'])['reset_password']
-    #     except:
-    #         return
-    #     return User.query.get(id)
-
-    # @staticmethod   
-    # def verify_account_confirmation_token(token):
-    #     print(token)
-    #     try:
-    #         id = jwt.decode(token, app.config['SECRET_KEY'],
-    #                         algorithms=['HS256'])['confirm_account']
-    #     except:
-    #         return
-    #     return User.query.get(id)
-
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
