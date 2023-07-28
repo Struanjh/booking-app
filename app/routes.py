@@ -224,6 +224,14 @@ def userProfile():
         form.email.data = user.email
     else:
         if form.validate_on_submit():
+            form_email = form.email.data.lower()
+            email_in_use = User.query.filter_by(email=form_email).first()
+            print(current_user.email)
+            print(form_email)
+            print(email_in_use)
+            if email_in_use and form_email != current_user.email:
+                flash('This email is already in use. Please select a different email')
+                return redirect(url_for('userProfile', id=current_user.id))
             user.first_name = form.first_name.data
             user.last_name = form.last_name.data 
             user.email = form.email.data
