@@ -18,7 +18,8 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 
 def send_password_reset_email(user):
-    token = user.get_reset_password_token()
+    token = user.get_token(expires_in=60, msg='reset_password')
+    ##7200
     send_email('Booking App Team: Reset Your Password',
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
@@ -29,7 +30,8 @@ def send_password_reset_email(user):
     )
 
 def send_account_confirmation_email(user):
-    token = user.get_account_confirmation_token()
+    token = user.get_token(expires_in=60, msg='confirm_account')
+    ##86400
     send_email('Booking App Team: Confirm your email',
                sender=app.config['ADMINS'][0],
                recipients=[user.email],

@@ -4,7 +4,6 @@ from wtforms.validators import DataRequired, ValidationError, DataRequired, Emai
 from app.models import User
 
 
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -33,9 +32,9 @@ class UserProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     edit_submit = SubmitField('Edit Profile')
 
-class ResetPasswordRequestForm(FlaskForm):
+class UserRequestForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField('Request Password Reset')
+    submit = SubmitField('Send')
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])

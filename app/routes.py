@@ -8,7 +8,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.email import send_password_reset_email, send_account_confirmation_email
-from app.forms import LoginForm, RegisterForm, UserProfileForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegisterForm, UserProfileForm, UserRequestForm, ResetPasswordForm
 from app.models import User, Role, EnglishClasses
 
 @app.route('/')
@@ -34,8 +34,8 @@ def login():
                 return redirect(url_for('home'))
             return redirect(next_page)
         elif user and not user.account_email_verified:
-            flash('Please check your email inbox to verify your email')
-            return redirect(url_for('login'))
+            flash('Please check your email inbox. You need to verify your account to login. Didn\'t receive the email or link expired? Submit your email below to receive another a new link')
+            return redirect(url_for('account_confirmation'))
         else:
             flash('Invalid email or password')
             return redirect(url_for('login'))
@@ -72,6 +72,69 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+
+@app.route('/account_confirmation_request', methods=['GET', 'POST'])
+def account_confirmation():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = UserRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_account_confirmation_email(user)
+        flash('Please check your email inbox. You need to verify your account to login')
+        return redirect(url_for('login'))
+    return render_template('account_confirm_request.html',
+                           title='Confirm Account', form=form)
+   
+
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = UserRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.account_email_verified:
+            send_password_reset_email(user)
+        flash('Check your email for the instructions to reset your password')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    ##Static method so can be called directly from the class
+    user = User.verify_token(token, msg='reset_password')
+    if not user:
+        flash('Reset Token invalid. Please submit your email to receive a new link')
+        return redirect(url_for('reset_password_request'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        user.pw_last_set = datetime.utcnow()
+        db.session.commit()
+        flash('Your password has been reset. Please login with your new password')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
+
+
+@app.route('/confirm_account/<token>')
+def confirm_account(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_token(token, msg='confirm_account')
+    if not user:
+        flash('Reset Token invalid. Please submit your email to receive a new link')
+        return redirect(url_for('account_confirmation'))
+    user.account_email_verified=True
+    db.session.add(user)
+    db.session.commit()
+    flash('Your account has been verified. Please login with your email and password')
+    return redirect(url_for('login'))
 
 @app.route('/bookings')
 @login_required
@@ -170,9 +233,6 @@ def userProfile():
             return redirect(url_for('userProfile',id=current_user.id))
     return render_template('userprofile.html', user=user, form=form)
 
-@app.route('/test')
-def test():
-    pass
 
 ##Initiate oauth process by redirecting app to oauth providers authorization endpoint
 @app.route('/authorize/<provider>')
@@ -293,50 +353,3 @@ def oauth2_callback(provider):
     userInfo = getUserDetails()
     updateDB()
     return redirect(url_for('home'))
-
-
-@app.route('/reset_password_request', methods=['GET', 'POST'])
-def reset_password_request():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = ResetPasswordRequestForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user:
-            send_password_reset_email(user)
-        flash('Check your email for the instructions to reset your password')
-        return redirect(url_for('login'))
-    return render_template('reset_password_request.html',
-                           title='Reset Password', form=form)
-
-@app.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    ##Static method so can be called directly from the class
-    user = User.verify_reset_password_token(token)
-    if not user:
-        flash('Reset Token expired or invalid')
-        return redirect(url_for('home'))
-    form = ResetPasswordForm()
-    if form.validate_on_submit():
-        user.set_password(form.password.data)
-        user.pw_last_set = datetime.utcnow()
-        db.session.commit()
-        flash('Your password has been reset. Please login with your new password')
-        return redirect(url_for('login'))
-    return render_template('reset_password.html', form=form)
-
-
-@app.route('/confirm_account/<token>')
-def confirm_account(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    user = User.verify_account_confirmation_token(token)
-    if not user:
-        flash('Reset Token expired or invalid')
-        return redirect(url_for('login'))
-    user.account_email_verified=True
-    db.commit()
-    flash('Your account has been verified. Please login with your email and password')
-    return redirect(url_for('login'))
