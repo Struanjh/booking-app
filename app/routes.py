@@ -125,7 +125,7 @@ def reset_password(token):
             for requirement in pw_policy.test_password(form.password.data):
                 alert = f"{requirement.name} password requirement was not satisfied. Must be {requirement.requirement}"
             flash(alert)
-            return redirect(url_for('reset_password_request'))
+            return redirect(url_for('reset_password', token=token))
         user.set_password(form.password.data)
         user.pw_last_set = datetime.utcnow()
         db.session.commit()
