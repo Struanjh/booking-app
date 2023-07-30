@@ -1,7 +1,7 @@
 Dear {{ user.first_name }},
 
 To confirm your account please paste the following url in your browser's address bar:
-{{ url_for('confirm_account', token=token, _external=True) }}
+{{ url_for('auth_bp.confirm_account', token=token, _external=True) }}
 
 Sincerely,
 Booking App Team

@@ -1,3 +1,3 @@
 FLASK_APP=booking_app.py
 FLASK_ENV=development
-FLASK_DEBUG=true
+FLASK_DEBUG=True

@@ -1,6 +1,6 @@
 
 from app import app, db, login
-from app.password_policy import pw_policy
+from app.auth.password_policy import pw_policy
 from time import time
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
