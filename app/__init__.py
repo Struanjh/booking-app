@@ -19,11 +19,13 @@ login.login_view = 'auth_bp.login'
 
 from app.auth.routes import auth_bp
 from app.booking.routes import booking_bp
+from app.core.routes import core_bp
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(booking_bp)
+app.register_blueprint(core_bp)
 
 #avoid circular imports
-from app import routes, models, admin
+from app import models, admin, routes
 
 
 

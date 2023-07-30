@@ -18,7 +18,7 @@ auth_bp = Blueprint('auth_bp', __name__, template_folder='templates/auth')
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -31,7 +31,7 @@ def login():
             next_page = request.args.get('next')
             ##Only allow redirects to same domain as this site
             if not next_page or url_parse(next_page).netloc != '':
-                return redirect(url_for('home'))
+                return redirect(url_for('core_bp.home'))
             return redirect(next_page)
         elif user and user.check_password(form.password.data) and not user.account_email_verified:
             flash('Please check your email inbox. You need to verify your account to login. Didn\'t receive the email or link expired? Submit your email below to receive another a new link')
@@ -51,7 +51,7 @@ def logout():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     form = RegisterForm()
     if form.validate_on_submit():
         if not User.validate_password(form.password.data):
@@ -81,7 +81,7 @@ def register():
 @auth_bp.route('/account_confirmation_request', methods=['GET', 'POST'])
 def account_confirmation():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     form = UserRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -97,7 +97,7 @@ def account_confirmation():
 @auth_bp.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     form = UserRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -111,7 +111,7 @@ def reset_password_request():
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     ##Static method so can be called directly from the class
     user = User.verify_token(token, msg='reset_password')
     if not user:
@@ -135,7 +135,7 @@ def reset_password(token):
 @auth_bp.route('/confirm_account/<token>')
 def confirm_account(token):
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     user = User.verify_token(token, msg='confirm_account')
     if not user:
         flash('Reset Token invalid. Please submit your email to receive a new link')
@@ -151,7 +151,7 @@ def confirm_account(token):
 @auth_bp.route('/authorize/<provider>')
 def oauth2_authorize(provider):
     if not current_user.is_anonymous:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     
     ##Select relevant oauth provider from config dictionary
     provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
@@ -179,7 +179,7 @@ def oauth2_authorize(provider):
 @auth_bp.route('/callback/<provider>')
 def oauth2_callback(provider):
     if not current_user.is_anonymous:
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
     
     provider_data = current_app.config['OAUTH2_PROVIDERS'].get(provider)
     if provider_data is None:
@@ -191,7 +191,7 @@ def oauth2_callback(provider):
             for k, v in request.args.items():
                 if k.startswith('error'):
                     flash(f'{k}: {v}')
-            return redirect(url_for('home'))
+            return redirect(url_for('core_bp.home'))
         # make sure that the state parameter matches the one created in the authorization request
         if request.args['state'] != session.get('oauth2_state'):
             abort(401)
@@ -241,7 +241,7 @@ def oauth2_callback(provider):
         ##Check in case user has already registered with that email as regular user
         if oauth_user and oauth_user.oauth == False:
             flash(f'You have already registered the email {email}. Please login with your email and password')
-            return redirect(url_for('home'))
+            return redirect(url_for('core_bp.home'))
 
         ##First time user so create record
         if not oauth_user:
@@ -266,4 +266,4 @@ def oauth2_callback(provider):
     oauth2_token = getAccessToken()
     userInfo = getUserDetails()
     updateDB()
-    return redirect(url_for('home'))
+    return redirect(url_for('core_bp.home'))

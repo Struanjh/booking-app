@@ -11,4 +11,3 @@ class UserProfileForm(FlaskForm):
     last_name = StringField('Last Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     edit_submit = SubmitField('Edit Profile')
-

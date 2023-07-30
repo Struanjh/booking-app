@@ -11,7 +11,7 @@ class MyAdminIndexView(AdminIndexView):
         return current_user.role.role == 'admin'
     
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('home'))
+        return redirect(url_for('core_bp.home'))
 
 class AdminUserView(ModelView):
     column_hide_backrefs = False
