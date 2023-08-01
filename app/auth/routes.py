@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
-from app import app, db
+from app import db
 from app.models import User, Role, EnglishClasses
 from app.auth.email import send_password_reset_email, send_account_confirmation_email
 from app.auth.forms import LoginForm, RegisterForm, UserRequestForm, ResetPasswordForm

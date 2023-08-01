@@ -1,10 +1,10 @@
 
-from app import app, db, login
+from app import db, login
 from app.auth.password_policy import pw_policy
 from time import time
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import redirect, url_for
+from flask import redirect, url_for, current_app
 from flask_login import UserMixin, current_user
 import jwt
 
@@ -64,13 +64,13 @@ class User(UserMixin, db.Model):
     def get_token(self, expires_in, msg):
          return jwt.encode(
             {msg: self.id, 'exp': time() + expires_in},
-            app.config['SECRET_KEY'], algorithm='HS256'
+            current_app.config['SECRET_KEY'], algorithm='HS256'
         )
     
     @staticmethod
     def verify_token(token, msg):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])[msg]
         except:
             return

@@ -1,9 +1,9 @@
 
 import pytz
 from datetime import datetime, timedelta
-from flask import render_template, flash, redirect, url_for, request, jsonify, session
+from flask import render_template, flash, redirect, url_for, request, jsonify, session, current_app
 from flask_login import current_user, login_required
-from app import app, db
+from app import db
 from app.models import EnglishClasses
 from flask import Blueprint
 
@@ -31,7 +31,7 @@ def makeBooking():
     classId = int(data['classId'])
     targetClass = EnglishClasses.query.get(classId)
     studentCount = targetClass.students.count()
-    maxSize = int(app.config['MAX_CLASS_SIZE'][0])
+    maxSize = int(current_app.config['MAX_CLASS_SIZE'][0])
     state = ''
     if studentCount >= maxSize:
         msg = 'This class is fully booked'
