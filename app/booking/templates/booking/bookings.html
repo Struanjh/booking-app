@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block header %}
+{% block navbar %}
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
 {% block content %}
+{{ super() }}
     <div id="available-classes">
         {% for class in classes %}
             <div class="class-id" data-class-id="{{ class.id }}">{{ class }}

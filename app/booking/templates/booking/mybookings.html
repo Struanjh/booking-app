@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block header %}
+{% block navbar %}
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
 {% block content %}
+{{ super() }}
 <div class="filters">
     <button id="upcoming">Upcoming Classes</button>
     <button id="completed">Completed Classes</button>

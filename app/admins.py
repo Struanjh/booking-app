@@ -39,8 +39,6 @@ class AdminRoleView(AdminModelView):
     create_modal = True
     edit_modal = True
 
-# admin.index_view(MyAdminIndexView, db.session)
-print('ADMIN', admin)
 admin.add_view(AdminUserView(User, db.session))
 admin.add_view(AdminClassView(EnglishClasses, db.session))
 admin.add_view(AdminRoleView(Role, db.session))

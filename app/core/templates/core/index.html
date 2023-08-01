@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block header %}
+{% block navbar %}
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
 {% block content %}
+{{ super() }}
 <img src="../static/home_img.jpg" alt="english study" width="500" height="300">
 {% if current_user.is_anonymous %}
 <h3>Welcome to the English cafe. Please login or register to view available classes and bookings</h3>
