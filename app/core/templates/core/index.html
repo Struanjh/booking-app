@@ -4,12 +4,22 @@
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
-{% block content %}
+{% block app_content %}
 {{ super() }}
-<img src="../static/home_img.jpg" alt="english study" width="500" height="300">
-{% if current_user.is_anonymous %}
-<h3>Welcome to the English cafe. Please login or register to view available classes and bookings</h3>
-{% else %}
-<h3>Welcome {{ current_user.first_name }}</h3>
-{% endif %}
+<div class="row">
+    <div class="col">
+        {% if current_user.is_anonymous %}
+        <h3>Welcome to the English cafe. Please login or register to view available classes and bookings</h3>
+        {% else %}
+        <h3>Welcome {{ current_user.first_name }}</h3>
+        {% endif %}
+    </div>
+    <div class="col">
+        <h1>Hi</h1>
+    </div>
+    <div class="col">
+        <img class="img-fluid" src="../static/home_img.jpg" alt="english study">
+    </div>
+</div>
+
 {% endblock %}

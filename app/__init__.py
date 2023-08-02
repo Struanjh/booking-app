@@ -7,7 +7,6 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_moment import Moment
 from flask_admin import Admin
-from flask_bootstrap import Bootstrap
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -21,7 +20,6 @@ login.login_message = 'Please login to view this page'
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
-    Bootstrap(app)
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)

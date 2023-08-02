@@ -1,17 +1,17 @@
-<header>
-    <ul>
-        <li><a href="{{ url_for('core_bp.home') }}">Home</a></li>
-        {% if current_user.is_anonymous %}
-        <li><a href="{{ url_for('auth_bp.login') }}">Login</a></li>
-        <li><a href="{{ url_for('auth_bp.register') }}">Register</a></li>
-        {% else %}
-            {% if current_user.role.role == 'admin' %}
-            <li><a href="/admin">Admin</a></li>
+<nav class="navbar navbar-default">
+    <div class="container-xxl">
+          <a href="{{ url_for('core_bp.home') }}">Home</a>
+            {% if current_user.is_anonymous %}
+          <a href="{{ url_for('auth_bp.login') }}">Login</a>
+          <a href="{{ url_for('auth_bp.register') }}">Register</a>
+            {% else %}
+                {% if current_user.role.role == 'admin' %}
+              <a href="/admin">Admin</a>
+                {% endif %}
+          <a href="{{ url_for('booking_bp.bookings')}}">Make a booking</a>
+          <a href="{{ url_for('booking_bp.myBookings') }}">View my bookings</a>
+          <a href="{{ url_for('core_bp.userProfile', id=current_user.id)}}">View my profile</a>
+          <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
             {% endif %}
-        <li><a href="{{ url_for('booking_bp.bookings')}}">Make a booking</a></li>
-        <li><a href="{{ url_for('booking_bp.myBookings') }}">View my bookings</a></li>
-        <li><a href="{{ url_for('core_bp.userProfile', id=current_user.id)}}">View my profile</a></li>
-        <li><a href="{{ url_for('auth_bp.logout') }}">Logout</a></li>
-        {% endif %}
-    </ul>
-</header>
+    </div>
+</nav>
