@@ -1,17 +1,26 @@
-<nav class="navbar navbar-default">
-    <div class="container-xxl">
-          <a href="{{ url_for('core_bp.home') }}">Home</a>
+
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('core_bp.home') }}">Booking App</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
             {% if current_user.is_anonymous %}
-          <a href="{{ url_for('auth_bp.login') }}">Login</a>
-          <a href="{{ url_for('auth_bp.register') }}">Register</a>
+            <a class="nav-link" href="{{ url_for('auth_bp.login') }}">Login</a>
+            <a class="nav-link" href="{{ url_for('auth_bp.register') }}">Register</a>
             {% else %}
                 {% if current_user.role.role == 'admin' %}
-              <a href="/admin">Admin</a>
+                <a class="nav-link" href="/admin">Admin</a>
                 {% endif %}
-          <a href="{{ url_for('booking_bp.bookings')}}">Make a booking</a>
-          <a href="{{ url_for('booking_bp.myBookings') }}">View my bookings</a>
-          <a href="{{ url_for('core_bp.userProfile', id=current_user.id)}}">View my profile</a>
-          <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+            <a class="nav-link" href="{{ url_for('booking_bp.bookings')}}">Make a booking</a>
+            <a class="nav-link" href="{{ url_for('booking_bp.myBookings') }}">View my bookings</a>
+            <a class="nav-link" href="{{ url_for('core_bp.userProfile', id=current_user.id)}}">View my profile</a>
+            <a class="nav-link" href="{{ url_for('auth_bp.logout') }}">Logout</a>
             {% endif %}
+        </div>
+      </div>
     </div>
-</nav>
+  </nav>

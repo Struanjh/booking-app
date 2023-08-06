@@ -14,27 +14,26 @@ def home():
 @core_bp.route('/userprofile', methods=['GET', 'POST'])
 @login_required
 def userProfile():
-    user = User.query.filter_by(id=current_user.id).first()
     form = UserProfileForm()
-    if request.method == 'GET':
-        form.id.data = user.id
-        form.join_date.data = user.join_date
-        form.last_login.data = user.last_login
-        form.first_name.data = user.first_name
-        form.last_name.data = user.last_name
-        form.email.data = user.email
-    else:
-        if form.validate_on_submit():
-            form_email = form.email.data.lower()
-            email_in_use = User.query.filter_by(email=form_email).first()
-            if email_in_use and form_email != current_user.email:
-                flash('This email is already in use. Please select a different email')
-                return redirect(url_for('core_bp.userProfile', id=current_user.id))
-            user.first_name = form.first_name.data
-            user.last_name = form.last_name.data 
-            user.email = form.email.data
-            db.session.add(user)
-            db.session.commit()
-            flash('Profile updated')
-            return redirect(url_for('core_bp.userProfile',id=current_user.id))
-    return render_template('userprofile.html', user=user, form=form)
+    if form.validate_on_submit():
+        form_email = form.email.data.lower()
+        email_in_use = User.query.filter_by(email=form_email).first()
+        if email_in_use and form_email != current_user.email:
+            form.email.errors.append('This email is already in use. Please select a different email')
+            print(form.email.errors)
+            return render_template('userprofile.html', user=current_user, form=form)
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data 
+        current_user.email = form_email
+        db.session.add(current_user)
+        db.session.commit()
+        flash('Profile updated')
+        return redirect(url_for('core_bp.userProfile',id=current_user.id))
+    elif request.method == 'GET':
+        form.id.data = current_user.id
+        form.join_date.data = current_user.join_date
+        form.last_login.data = current_user.last_login
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.email.data = current_user.email
+    return render_template('userprofile.html', user=current_user, form=form)

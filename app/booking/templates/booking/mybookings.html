@@ -6,53 +6,59 @@
 
 {% block app_content %}
 {{ super() }}
-<div class="filters">
-    <button id="upcoming">Upcoming Classes</button>
-    <button id="completed">Completed Classes</button>
-</div>
-<div class="user-bookings">
-{% if userClasses %}
-{% for class in userClasses %}
-    <div class="class" data-class-complete="{{ currtime > class.end_time }}" data-class-id="{{ class.id }}">
-        <p>Class ID: {{ class.id }}</p>
-        <!-- <p>Start Time: {{ class.start_time}} </p> -->
-        <p>Class Start Time: {{ moment(class.start_time).format('LLL') }}</p>
-        <p>Class Finish Time: {{ moment(class.end_time).format('LLL') }}</p>  
-    </div>
-{% endfor %}
-{% else %}
-<p>No bookings yet</p>
-{% endif %}
+<div class="user-bookings text-center container">
+    {% if userClasses %}
+        <div id="class-status-filters" class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+            <input type="checkbox" class="btn-check" id="upcoming" autocomplete="off">
+            <label class="btn btn-outline-primary active" for="upcoming">UPCOMING</label>
+        
+            <input type="checkbox" class="btn-check" id="in-progress" autocomplete="off">
+            <label class="btn btn-outline-primary active" for="in-progress">IN PROGRESS</label>
+        
+            <input type="checkbox" class="btn-check" id="complete" autocomplete="off">
+            <label class="btn btn-outline-primary active" for="complete">COMPLETE</label>
+        </div>
+        {% for class_batched in userClasses|batch(3) %}
+        <div class="row g-2 d-flex justify-content-center">
+            {% for class in class_batched %}
+                {% include 'sub_templates/__view_booking_card.html' %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No bookings yet</p>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script>
-    const upcomingBtn = document.getElementById('upcoming');
-    const completedBtn = document.getElementById('completed');
-    const classes = document.querySelectorAll('.class')
-    upcomingBtn.addEventListener('click', e => {
-        for(let i=0; i < classes.length; i++) {
-            if(classes[i].dataset.classComplete === "True") {
-                classes[i].style.display = 'none';
-            } else {
-                classes[i].style.display = 'block';
-            }
-        }
-        upcomingBtn.style.backgroundColor = 'green'
-        completedBtn.style.backgroundColor = ''
-    });
-    completedBtn.addEventListener('click', e => {
-        for(let i=0; i < classes.length; i++) {
-            if(classes[i].dataset.classComplete === "False") {
-                classes[i].style.display = 'none';
-            } else {
-                classes[i].style.display = 'block';
-            }
-        }
-        completedBtn.style.backgroundColor = 'green'
-        upcomingBtn.style.backgroundColor = ''
-    });
+    const filterBtns = document.getElementById('class-status-filters');
+    filterBtns.addEventListener('click', (e) => {
+        e.preventDefault();
+        let filters = getCurrentFilters(e);
+        updateUI(filters);
+    })
+
+    const getCurrentFilters = (e) => {
+        let label = e.target.nodeName === 'INPUT' ? e.target.nextElementSibling : e.target;
+        label.classList.contains('active') ? label.classList.remove('active') : label.classList.add('active');
+        let filters = [...filterBtns.childNodes]
+        .filter(node => node.nodeName === 'LABEL')
+        .filter(node => node.classList.contains('active'))
+        .map(node => node.htmlFor);
+        return filters;
+    }
+
+    const updateUI = (filters) => {
+        console.log(filters);
+        let classes = [...document.querySelectorAll('.class')];
+        classes.forEach(item => {
+            let status = item.dataset.classStatus;
+            filters.includes(status) ? item.style.display = 'block' : item.style.display = 'none';
+        })
+        //Under what circumstances should that part be updated?
+    }
 </script>
 {% endblock %}

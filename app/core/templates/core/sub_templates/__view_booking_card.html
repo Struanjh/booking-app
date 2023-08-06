@@ -1,0 +1,39 @@
+
+{% if currtime > class.end_time %}
+{% set status = 'complete' %}
+{% elif currtime < class.start_time %} 
+{% set status = 'upcoming' %}
+{% else %}
+{% set status = 'in-progress' %}
+{% endif %}
+
+<div class="class card text-center m-3 col-sm-12 col-md-6 col-lg-4" data-class-status="{{ status }}" data-class-id="{{ class.id }}">
+    <img src="../static/home_img.jpg" class="card-img-top" alt="Class Booking Image">
+    <div class="card-bodyclass-id d-flex flex-column" data-class-id="{{ class.id }}">
+        <div class="card-title p-2">
+            <i class="fa-solid fa-hourglass-start me-2"></i>
+            Starts: {{ moment(class.start_time).format('LLL') }}
+        </div>
+        <div class="card-title p-2">
+            <i class="fa-solid fa-hourglass-end me-2"></i>
+            Ends: {{ moment(class.end_time).format('LLL') }}
+        </div>
+        <div class="student-count card-subtitle mb-2 text-body-secondary p-2" data-student-count="{{ class.students.count() }}">
+            <i class="fa-solid fa-person me-2"></i>
+                {% if class.students.count() == 1 %}
+                    {{ class.students.count() }} Student Registered
+                {% else %}
+                    {{ class.students.count() }} Students registered
+                {% endif %}
+        </div>
+        <div class="p-2">
+            <i class="fa-solid fa-clock me-2"></i>
+            Class duration: {{ moment(class.end_time).diff(class.start_time, 'minutes') }} minutes
+        </div>
+        <div class="p-2">
+            {% filter upper %}
+            {{ status }}
+            {% endfilter %}
+        </div>
+    </div>
+</div>

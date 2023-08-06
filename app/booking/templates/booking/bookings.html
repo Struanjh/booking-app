@@ -6,22 +6,18 @@
 
 {% block app_content %}
 {{ super() }}
-    <div id="available-classes">
-        {% for class in classes %}
-            <div class="class-id" data-class-id="{{ class.id }}">{{ class }}
-                <div class="student-count" data-student-count="{{ class.students.count() }}">
-                    There are {{ class.students.count() }} students signed up for this class
-                </div>
-                {% if class.students.filter_by(id=current_user.id).first() %}
-                <button class="cancelbooking">Cancel booking</button>
-                {% else %}
-                <button class="makebooking">Book the class</button>
-                {% endif %}
-                <div class="message"></div>
+    <div id="available-classes" class="container text-center px-2 mt-5">
+        {% for class_batched in classes|batch(3) %}
+            <div class="row g-2 d-flex justify-content-center">
+            {% for class in class_batched %}
+                {% include 'sub_templates/__manage_booking_card.html' %}
+            {% endfor %}
             </div>
         {% endfor %}
     </div>
 {% endblock %}
+
+
 
 {% block scripts %}
     {{ super() }}
@@ -30,35 +26,35 @@
         const manageBookings = async e => {
             if(e.target.nodeName === "BUTTON") {
                 const btn = e.target;
-                const action = e.target.className
-                if(action === 'makebooking' || action === 'cancelbooking') {
-                    const classId = e.target.parentElement.dataset.classId;
-                    const studentCount = [...e.target.parentElement.children]
-                    .filter(elem => elem.classList.contains("student-count"))[0]
-                    const msg = [...e.target.parentElement.children]
-                    .filter(elem => elem.classList.contains("message"))[0]
-                    const res = await fetch(
-                        `/${action}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({classId: classId})
-                        }
-                    )
-                    if(res.ok) {
-                        const data = await res.json();
-                        studentCount.textContent = `There are ${data.studentCount} students signed up for this class`;
-                        msg.textContent = `${data.message}`;
-                        if(data.state == 'ADDED') {
-                            btn.className = 'cancelbooking';
-                            btn.textContent = 'Cancel Booking';
-                        } else if (data.state === 'REMOVED') {
-                            btn.className = 'makebooking';
-                            btn.textContent = 'Book the class';
-                    } else {
-                        console.log('Some kind of problem');
-                        msg.textContent = `There was an issue connecting to the server`;
+                const action = btn.classList.contains('makebooking') ? 'makebooking' : 'cancelbooking';
+                const classId = e.target.parentElement.dataset.classId;
+                const studentCount = [...e.target.parentElement.children]
+                .filter(elem => elem.classList.contains("student-count"))[0]
+                const msg = [...e.target.parentElement.children]
+                .filter(elem => elem.classList.contains("message"))[0]
+                const res = await fetch(
+                    `/${action}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({classId: classId})
                     }
+                )
+                if(res.ok) {
+                    const data = await res.json();
+                    studentCount.innerHTML = parseInt(data.studentCount) === 1 ?
+                        `<i class="fa-solid fa-person"></i> ${data.studentCount} Student Registered` : 
+                        `<i class="fa-solid fa-person"></i> ${data.studentCount} Students Registered`;
+                    msg.textContent = `${data.message}`;
+                    if(data.state == 'ADDED') {
+                        btn.className = 'cancelbooking btn bg-danger-subtle'
+                        btn.textContent = 'Cancel Booking';
+                    } else if (data.state === 'REMOVED') {
+                        btn.className = 'makebooking btn bg-success-subtle'
+                        btn.textContent = 'Book Class';
+                } else {
+                    console.log('Some kind of problem');
+                    msg.textContent = `There was an issue connecting to the server`;
                 }
             }
         }
