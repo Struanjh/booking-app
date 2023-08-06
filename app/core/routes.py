@@ -20,8 +20,7 @@ def userProfile():
         email_in_use = User.query.filter_by(email=form_email).first()
         if email_in_use and form_email != current_user.email:
             form.email.errors.append('This email is already in use. Please select a different email')
-            print(form.email.errors)
-            return render_template('userprofile.html', user=current_user, form=form)
+            return render_template('userprofile.html', title='My Profile', user=current_user, form=form)
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data 
         current_user.email = form_email
@@ -36,4 +35,4 @@ def userProfile():
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
-    return render_template('userprofile.html', user=current_user, form=form)
+    return render_template('userprofile.html', user=current_user, title='My Profile', form=form, alert_status='alert-success')

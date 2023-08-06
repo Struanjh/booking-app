@@ -6,35 +6,36 @@
 
 {% block app_content %}
 {{ super() }}
-<h1>Welcome to the login page</h1>
-<form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
-    <p>
-       {{ form.email.label }} <br>
-       {{ form.email() }} <br>
-       {% for error in form.email.errors %}
-       <span>{{ error }}</span>
-       {% endfor %}
-    </p>
-    <p>
-       {{ form.password.label }} <br>
-       {{ form.password() }}<br>
-       {% for error in form.password.errors %}
-       <span>{{ error }}</span>
-       {% endfor %}
-    </p>
-    <p>
-        {{ form.remember_me.label }}
-        {{ form.remember_me() }}
-    </p>
-    <p>
-        {{ form.submit() }}
-    </p>
-</form>
-<p>
-    <a class="btn btn-primary" href="{{ url_for('auth_bp.oauth2_authorize', provider='google') }}">Login with Google</a>
-</p>
-<p>Forgot Your Password?
-    <a href="{{ url_for('auth_bp.reset_password_request') }}">Click to Reset It</a>
-</p>
+<div class="d-flex justify-content-center">
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+           {{ form.email.label(class="form-label") }} <br>
+           {{ form.email(class="form-control") }} <br>
+           {% for error in form.email.errors %}
+           <span class="text-danger">{{ error }}</span>
+           {% endfor %}
+        </p>
+        <p>
+           {{ form.password.label(class="form-label") }} <br>
+           {{ form.password(class="form-control") }}<br>
+           {% for error in form.password.errors %}
+           <span class="text-danger">{{ error }}</span>
+           {% endfor %}
+        </p>
+        <p>
+            {{ form.remember_me.label(class="form-label") }}
+            {{ form.remember_me() }}
+        </p>
+        <p>
+            {{ form.submit(class="btn btn-primary") }}
+        </p>
+        <p>
+            <a class="btn btn-primary" href="{{ url_for('auth_bp.oauth2_authorize', provider='google') }}">Login with Google</a>
+        </p>
+        <p>Forgot Your Password?
+            <a href="{{ url_for('auth_bp.reset_password_request') }}">Click to Reset It</a>
+        </p>
+    </form>
+</div>
 {% endblock %}

@@ -21,7 +21,7 @@ def login():
         return redirect(url_for('core_bp.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user and user.check_password(form.password.data) and user.account_email_verified:
             login_user(user, remember=form.remember_me.data)
             user.last_login = datetime.utcnow()
@@ -39,7 +39,7 @@ def login():
         else:
             flash('Invalid email or password')
             return redirect(url_for('auth_bp.login'))
-    return render_template('login.html', title='Login', form=form)   
+    return render_template('login.html', title='Login', alert_status='alert-info', form=form)   
 
 
 @auth_bp.route('/logout')
@@ -54,11 +54,13 @@ def register():
         return redirect(url_for('core_bp.home'))
     form = RegisterForm()
     if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.lower()).first()
+        if user:
+            flash('Email unavailable')
+            return redirect(url_for('auth_bp.register'))
         if not User.validate_password(form.password.data):
-            for requirement in pw_policy.test_password(form.password.data):
-                alert = f"{requirement.name} password requirement was not satisfied. Must be {requirement.requirement}"
-                flash(alert)
-                return redirect(url_for('auth_bp.register'))
+            flash("Passwords must be at least 12 characters long and contain at least one lower and uppercase letter")
+            return redirect(url_for('auth_bp.register'))
         user = User(
             email=form.email.data.lower(),
             first_name=form.first_name.data,
@@ -75,7 +77,7 @@ def register():
         send_account_confirmation_email(user)
         flash('Please check your email inbox. You need to verify your account to login')
         return redirect(url_for('auth_bp.login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', alert_status='alert-info', title='Register', form=form)
 
 
 @auth_bp.route('/account_confirmation_request', methods=['GET', 'POST'])
@@ -84,12 +86,12 @@ def account_confirmation():
         return redirect(url_for('core_bp.home'))
     form = UserRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user:
             send_account_confirmation_email(user)
         flash('Please check your email inbox. You need to verify your account to login')
         return redirect(url_for('auth_bp.login'))
-    return render_template('account_confirm_request.html',
+    return render_template('account_confirm_request.html', alert_status='alert-info',
                            title='Confirm Account', form=form)
    
 
@@ -105,7 +107,7 @@ def reset_password_request():
             send_password_reset_email(user)
         flash('Check your email for the instructions to reset your password')
         return redirect(url_for('auth_bp.login'))
-    return render_template('reset_password_request.html',
+    return render_template('reset_password_request.html', alert_status='alert-info',
                            title='Reset Password', form=form)
 
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -129,7 +131,7 @@ def reset_password(token):
         db.session.commit()
         flash('Your password has been reset. Please login with your new password')
         return redirect(url_for('auth_bp.login'))
-    return render_template('reset_password.html', form=form)
+    return render_template('reset_password.html', title='Reset Password', alert_status='alert-info', form=form)
 
 
 @auth_bp.route('/confirm_account/<token>')

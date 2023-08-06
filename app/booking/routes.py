@@ -13,7 +13,7 @@ booking_bp = Blueprint('booking_bp', __name__, template_folder='templates/bookin
 @login_required
 def bookings():
     classes = EnglishClasses.query.all()
-    return render_template('bookings.html', title='Bookings', classes=classes)
+    return render_template('bookings.html', title='Make a Booking', classes=classes)
 
     def nextTenDates(numdays):
         dayOne = datetime.now(pytz.timezone('Asia/Seoul'))
@@ -79,5 +79,5 @@ def cancelBooking():
 @login_required
 def myBookings():
     userClasses = current_user.classes.all()
-    return render_template('mybookings.html', userClasses=userClasses, currtime = datetime.utcnow())
+    return render_template('mybookings.html', title='My Bookings', userClasses=userClasses, currtime = datetime.utcnow())
 
