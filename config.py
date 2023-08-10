@@ -8,8 +8,8 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False,
-    MAX_CLASS_SIZE=10,
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CLASS_SIZE=10
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
@@ -34,3 +34,23 @@ class Config(object):
             ]
         }
     }
+    DAILY_CLASS_SCHEDULE = {
+        'class_1': {
+            'start_time': '10.00',
+            'end_time': '11.00'
+        },
+        'class_2': {
+            'start_time': '11.00',
+            'end_time': '12.00'
+        },
+        'class_3': {
+            'start_time': '13.30',
+            'end_time': '14.45'
+        },
+        'class_4': {
+            'start_time': '14.30',
+            'end_time': '15.30'
+        }
+    }
+    TZ_INFO = 'Asia/Seoul'
+    CLASSES_OPEN_IN_DAYS = 8

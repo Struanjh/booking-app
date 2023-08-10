@@ -1,6 +1,6 @@
 
 import pytz
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import render_template, flash, redirect, url_for, request, jsonify, session, current_app
 from flask_login import current_user, login_required
 from app import db
@@ -12,16 +12,13 @@ booking_bp = Blueprint('booking_bp', __name__, template_folder='templates/bookin
 @booking_bp.route('/bookings')
 @login_required
 def bookings():
-    classes = EnglishClasses.query.all()
+    open_in_days = current_app.config['CLASSES_OPEN_IN_DAYS']
+    delta = timedelta(days=+open_in_days)
+    startDate = datetime.now(pytz.timezone(current_app.config['TZ_INFO']))
+    startDate = startDate.replace(hour=0, minute=0)
+    endDate = startDate + delta
+    classes = EnglishClasses.query.filter(EnglishClasses.start_time >= startDate).filter(EnglishClasses.end_time <= endDate).order_by(EnglishClasses.start_time.asc()).all()
     return render_template('bookings.html', title='Make a Booking', classes=classes)
-
-    def nextTenDates(numdays):
-        dayOne = datetime.now(pytz.timezone('Asia/Seoul'))
-        date_range = [dayOne - timedelta(days=x) for x in range(numdays)]
-        print(dayOne, date_range)
-
-    def getMinMaxUtc():
-        pass
 
 
 @booking_bp.route('/makebooking', methods=['POST'])
@@ -78,6 +75,6 @@ def cancelBooking():
 @booking_bp.route('/mybookings')
 @login_required
 def myBookings():
-    userClasses = current_user.classes.all()
-    return render_template('mybookings.html', title='My Bookings', userClasses=userClasses, currtime = datetime.utcnow())
-
+    userClasses = current_user.classes.order_by(EnglishClasses.start_time.asc()).all()
+    t_zone = pytz.timezone(current_app.config['TZ_INFO'])
+    return render_template('mybookings.html', title='My Bookings', userClasses=userClasses, currtime = datetime.now(t_zone), t_zone=t_zone)

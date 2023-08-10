@@ -1,25 +1,57 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+<style>
+#home-img {
+    background-image:url('../static/home.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat no-repeat;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}   
+#welcome-msg {
+    position: absolute;
+    top: 100px;
+    right: -20px;
+    width: 300px;
+    text-align: center;
+    margin-right: 100px;
+}
+
+@media (max-width: 30em) {
+  #home-img {
+    background-image: none;
+    display: flex;
+    justify-content: center;
+  }
+  #welcome-msg {
+    text-align: center;
+    position: relative;
+    top: 100px;
+    right: 0px;
+    margin: 0px;
+  }
+}
+
+
+</style>
+{% endblock %}
+
 {% block navbar %}
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
-{% block app_content %}
-{{ super() }}
-<div class="row">
-    <div class="col">
-        {% if current_user.is_anonymous %}
-        <h3>Welcome to the English cafe. Please login or register to view available classes and bookings</h3>
+{% block content %}
+<div id="home-img">
+    <h3 id="welcome-msg">
+    {% if current_user.is_anonymous %}
+        Please login or register to book classes
         {% else %}
-        <h3>Welcome {{ current_user.first_name }}</h3>
-        {% endif %}
-    </div>
-    <div class="col">
-        <h1>Hi</h1>
-    </div>
-    <div class="col">
-        <img class="img-fluid" src="../static/home_img.jpg" alt="english study">
-    </div>
+        Welcome {{ current_user.first_name }}
+    {% endif %}
+    </h3>
 </div>
-
 {% endblock %}

@@ -1,7 +1,6 @@
-import secrets
-import requests
+import secrets, requests, pytz
 from urllib.parse import urlencode
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import render_template, flash, redirect, url_for, request, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -24,7 +23,7 @@ def login():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user and user.check_password(form.password.data) and user.account_email_verified:
             login_user(user, remember=form.remember_me.data)
-            user.last_login = datetime.utcnow()
+            user.last_login = datetime.now(pytz.timezone(current_app.config['TZ_INFO']))
             db.session.add(user)
             db.session.commit()
             ##Next param contains url user tried to access when redirected from a route protected by login_required
@@ -65,10 +64,10 @@ def register():
             email=form.email.data.lower(),
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            join_date=datetime.utcnow(),
+            join_date=datetime.now(pytz.timezone(current_app.config['TZ_INFO'])),
             oauth=False,
             account_email_verified=False,
-            pw_last_set=datetime.utcnow()
+            pw_last_set=datetime.now(pytz.timezone(current_app.config['TZ_INFO']))
         )
         user.role_id=Role.query.filter_by(role='user').first().id
         user.set_password(form.password.data)
@@ -127,7 +126,7 @@ def reset_password(token):
             flash(alert)
             return redirect(url_for('auth_bp.reset_password', token=token))
         user.set_password(form.password.data)
-        user.pw_last_set = datetime.utcnow()
+        user.pw_last_set = datetime.now(pytz.timezone(current_app.config['TZ_INFO']))
         db.session.commit()
         flash('Your password has been reset. Please login with your new password')
         return redirect(url_for('auth_bp.login'))
@@ -252,14 +251,14 @@ def oauth2_callback(provider):
                 last_name = last_name,
                 email = email,
                 pw_hash = None,
-                join_date = datetime.utcnow(),
+                join_date = datetime.now(pytz.timezone(current_app.config['TZ_INFO'])),
                 oauth = True,
                 role_id = Role.query.filter_by(role='user').first().id,
                 account_email_verified=True,
                 pw_last_set=None
             )
 
-        oauth_user.last_login = datetime.utcnow()
+        oauth_user.last_login = datetime.now(pytz.timezone(current_app.config['TZ_INFO']))
         db.session.add(oauth_user)
         db.session.commit()
         login_user(oauth_user)
