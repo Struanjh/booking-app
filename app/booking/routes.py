@@ -28,7 +28,7 @@ def makeBooking():
     classId = int(data['classId'])
     targetClass = EnglishClasses.query.get(classId)
     studentCount = targetClass.students.count()
-    maxSize = int(current_app.config['MAX_CLASS_SIZE'][0])
+    maxSize = int(current_app.config['MAX_CLASS_SIZE'])
     state = ''
     if studentCount >= maxSize:
         msg = 'This class is fully booked'

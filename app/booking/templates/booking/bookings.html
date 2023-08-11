@@ -7,13 +7,15 @@
 {% block app_content %}
 {{ super() }}
     <div id="available-classes" class="container text-center px-2 mt-5">
-        {% for class_batched in classes|batch(3) %}
-            <div class="row g-2 d-flex justify-content-center">
-            {% for class in class_batched %}
-                {% include 'sub_templates/__manage_booking_card.html' %}
+        <div class="container overflow-hidden">
+            {% for class_batched in classes|batch(3) %}
+                <div class="row mt-2 g-5 gy-2 justify-content-center">
+                    {% for class in class_batched %}
+                        {% include 'sub_templates/__manage_booking_card.html' %}
+                    {% endfor %}
+                </div>
             {% endfor %}
-            </div>
-        {% endfor %}
+        </div>
     </div>
 {% endblock %}
 

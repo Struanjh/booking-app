@@ -1,32 +1,34 @@
 
-<div class="card text-center m-3 col-sm-12 col-md-6 col-lg-4">
-    <img src="../static/home_img.jpg" class="card-img-top" alt="Class Booking Image">
-    <div class="card-bodyclass-id d-flex flex-column" data-class-id="{{ class.id }}">
-    <div class="card-title p-2">
-        <i class="fa-solid fa-hourglass-start me-2"></i>
-        Starts: {{ moment(class.start_time).format('LLL') }}
-    </div>
-    <div class="card-title p-2">
-        <i class="fa-solid fa-hourglass-end me-2"></i>
-        Ends: {{ moment(class.end_time).format('LLL') }}
-    </div>
-    <div class="student-count card-subtitle mb-2 text-body-secondary p-2" data-student-count="{{ class.students.count() }}">
-        <i class="fa-solid fa-person me-2"></i>
-            {% if class.students.count() == 1 %}
-                {{ class.students.count() }} Student Registered
+<div class="col-8 col-s-10 col-md-6 col-lg-4">
+    <div class="card h-100 text-center">
+        <img src="../static/home_img.jpg" class="card-img-top" alt="Class Booking Image">
+        <div class="card-bodyclass-id d-flex flex-column align-items-stretch" data-class-id="{{ class.id }}">
+            <div class="card-title p-2">
+                <i class="fa-solid fa-hourglass-start me-2"></i>
+                Starts: {{ moment(class.start_time).format('LLL') }}
+            </div>
+            <div class="card-title p-2">
+                <i class="fa-solid fa-hourglass-end me-2"></i>
+                Ends: {{ moment(class.end_time).format('LLL') }}
+            </div>
+            <div class="student-count card-subtitle mb-2 text-body-secondary p-2" data-student-count="{{ class.students.count() }}">
+                <i class="fa-solid fa-person me-2"></i>
+                    {% if class.students.count() == 1 %}
+                        {{ class.students.count() }} Student Registered
+                    {% else %}
+                        {{ class.students.count() }} Students registered
+                    {% endif %}
+            </div>
+            <div class="p-2">
+                <i class="fa-solid fa-clock me-2"></i>
+                Class duration: {{ moment(class.end_time).diff(class.start_time, 'minutes') }} minutes
+            </div>
+            {% if class.students.filter_by(id=current_user.id).first() %}
+            <button class="cancelbooking btn bg-danger-subtle p-2">Cancel Booking</button>
             {% else %}
-                {{ class.students.count() }} Students registered
+            <button class="makebooking btn bg-success-subtle p-2">Book Class</button>
             {% endif %}
-    </div>
-    <div class="p-2">
-        <i class="fa-solid fa-clock me-2"></i>
-        Class duration: {{ moment(class.end_time).diff(class.start_time, 'minutes') }} minutes
-    </div>
-    {% if class.students.filter_by(id=current_user.id).first() %}
-    <button class="cancelbooking btn bg-danger-subtle p-2">Cancel Booking</button>
-    {% else %}
-    <button class="makebooking btn bg-success-subtle p-2">Book Class</button>
-    {% endif %}
-    <div class="message p-2"></div>
+            <div class="message p-2"></div>
+        </div>
     </div>
 </div>
