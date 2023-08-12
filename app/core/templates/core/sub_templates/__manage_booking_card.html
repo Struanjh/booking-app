@@ -2,12 +2,12 @@
 <div class="col-8 col-s-10 col-md-6 col-lg-4">
     <div class="card h-100 text-center">
         <img src="../static/home_img.jpg" class="card-img-top" alt="Class Booking Image">
-        <div class="card-bodyclass-id d-flex flex-column align-items-stretch" data-class-id="{{ class.id }}">
-            <div class="card-title p-2">
+        <div class="card-bodyclass-id d-flex flex-column justify-content-between" data-class-id="{{ class.id }}">
+            <div class="class-start-time card-title p-2">
                 <i class="fa-solid fa-hourglass-start me-2"></i>
                 Starts: {{ moment(class.start_time).format('LLL') }}
             </div>
-            <div class="card-title p-2">
+            <div class="class-end-time card-title p-2">
                 <i class="fa-solid fa-hourglass-end me-2"></i>
                 Ends: {{ moment(class.end_time).format('LLL') }}
             </div>
@@ -24,11 +24,12 @@
                 Class duration: {{ moment(class.end_time).diff(class.start_time, 'minutes') }} minutes
             </div>
             {% if class.students.filter_by(id=current_user.id).first() %}
-            <button class="cancelbooking btn bg-danger-subtle p-2">Cancel Booking</button>
+            <button class="cancelbooking btn bg-danger-subtle p-2" type="button">Cancel Booking</button>
             {% else %}
-            <button class="makebooking btn bg-success-subtle p-2">Book Class</button>
+            <button class="makebooking btn bg-success-subtle p-2" type="button">Book Class</button>
             {% endif %}
-            <div class="message p-2"></div>
         </div>
     </div>
 </div>
+  
+

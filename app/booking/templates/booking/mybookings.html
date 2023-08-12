@@ -1,30 +1,42 @@
 {% extends "base.html" %}
 
+{% block head %}
+{{ super() }}
+<style>
+    .button {
+    color: #fff;
+    border:none; 
+    border-radius:0px; 
+    padding:15px;
+    min-height:30px; 
+    min-width: 120px;
+  }
+</style>
+{% endblock %}
+
 {% block navbar %}
 {% include 'sub_templates/__header.html' %}
 {% endblock %}
 
+
 {% block app_content %}
 {{ super() }}
 <div class="user-bookings text-center container">
+    <div id="class-status-filters" class="btn-group">
+        <button id="complete" class="btn btn-primary active">Complete</button>
+        <button id="upcoming" class="btn btn-primary active">Upcoming</button>
+        <button id="in-progress" class="btn btn-primary active">In Progress</button>
+    </div>
     {% if userClasses %}
-        <div id="class-status-filters" class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-            <input type="checkbox" class="btn-check" id="upcoming" autocomplete="off">
-            <label class="btn btn-outline-primary active" for="upcoming">UPCOMING</label>
-        
-            <input type="checkbox" class="btn-check" id="in-progress" autocomplete="off">
-            <label class="btn btn-outline-primary active" for="in-progress">IN PROGRESS</label>
-        
-            <input type="checkbox" class="btn-check" id="complete" autocomplete="off">
-            <label class="btn btn-outline-primary active" for="complete">COMPLETE</label>
-        </div>
-        {% for class_batched in userClasses|batch(3) %}
-        <div class="row g-2 d-flex justify-content-center">
-            {% for class in class_batched %}
-                {% include 'sub_templates/__view_booking_card.html' %}
+        <div class="container overflow-hidden">
+            {% for class_batched in userClasses|batch(3) %}
+            <div class="row mt-2 g-5 gy-2 justify-content-center">
+                {% for class in class_batched %}
+                    {% include 'sub_templates/__view_booking_card.html' %}
+                {% endfor %}
+            </div>
             {% endfor %}
         </div>
-        {% endfor %}
     {% else %}
         <p>No bookings yet</p>
     {% endif %}
@@ -36,29 +48,28 @@
 <script>
     const filterBtns = document.getElementById('class-status-filters');
     filterBtns.addEventListener('click', (e) => {
-        e.preventDefault();
         let filters = getCurrentFilters(e);
         updateUI(filters);
     })
 
     const getCurrentFilters = (e) => {
-        let label = e.target.nodeName === 'INPUT' ? e.target.nextElementSibling : e.target;
-        label.classList.contains('active') ? label.classList.remove('active') : label.classList.add('active');
-        let filters = [...filterBtns.childNodes]
-        .filter(node => node.nodeName === 'LABEL')
-        .filter(node => node.classList.contains('active'))
-        .map(node => node.htmlFor);
-        return filters;
+        let clickedFilter = e.target;
+        clickedFilter.classList.toggle('active');
+        clickedFilter.classList.toggle('btn-light');
+        clickedFilter.classList.toggle('btn-primary');
+        let currentFilters = [...filterBtns.childNodes]
+            .filter(node => node.nodeName === 'BUTTON')
+            .filter(node => node.classList.contains('active'))
+            .map(node => node.id);
+        return currentFilters;
     }
 
     const updateUI = (filters) => {
-        console.log(filters);
         let classes = [...document.querySelectorAll('.class')];
         classes.forEach(item => {
             let status = item.dataset.classStatus;
             filters.includes(status) ? item.style.display = 'block' : item.style.display = 'none';
         })
-        //Under what circumstances should that part be updated?
     }
 </script>
 {% endblock %}
