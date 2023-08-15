@@ -2,7 +2,7 @@
 <div class="col-8 col-s-10 col-md-6 col-lg-4">
     <div class="card h-100 text-center">
         <img src="../static/home_img.jpg" class="card-img-top" alt="Class Booking Image">
-        <div class="card-bodyclass-id d-flex flex-column justify-content-between" data-class-id="{{ class.id }}">
+        <div class="h-100 card-bodyclass-id d-flex flex-column justify-content-between" data-class-id="{{ class.id }}">
             <div class="class-start-time card-title p-2">
                 <i class="fa-solid fa-hourglass-start me-2"></i>
                 Starts: {{ moment(class.start_time).format('LLL') }}

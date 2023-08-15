@@ -1,46 +1,8 @@
 {% extends "base.html" %}
 
 {% block head %}
-{{ super() }}
-<style>
-    .hidden {
-        display: none;
-    }
-    .booking-modal {
-        display: none;
-        flex-direction: column;
-        text-align: center;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        justify-content: center;
-        gap: 0.4rem;
-        width: 50vw;
-        padding: 1.3rem;
-        min-height: 250px;
-        background-color: white;
-        border: 1px solid #ddd;
-        z-index: 2;
-        border-radius: 15px;
-    }
-    .overlay {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.747);
-        z-index: 1;
-    }
-    .btn-close {
-        transform: translate(10px, -20px);
-        align-self: flex-end;
-    }
-
-</style>
+{{ super () }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/booking_modal.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -49,13 +11,11 @@
 
 {% block app_content %}
 {{ super() }}
-    <div class="booking-modal">
-        <button class="btn-close"></button>
+    <div class="booking-modal hidden">
+        <button class="btn-close btn-warning"></button>
         <h3 class="booking-confirm-msg"></h3>
         <button class="btn btn-primary confirm">Confirm</button>
-        <div class="alert alert-success hidden alert-message">
-            <!-- <p class="message"></p> -->
-        </div>
+        <div class="alert alert-success hidden alert-message"></div>
     </div>
     <div class="overlay hidden"></div>
     <div id="available-classes" class="container overflow-hidden">
@@ -71,10 +31,8 @@
 {% endblock %}
 
 
-
 {% block scripts %}
     {{ super() }}
-
     <script>
         const modal = document.querySelector(".booking-modal");
         const overlay = document.querySelector(".overlay");
@@ -96,8 +54,6 @@
                 console.log(classStart)
                 studentCount = children.filter(elem => elem.classList.contains("student-count"))[0]
                 displayModal(action, classStart);
-                // const msg = [...e.target.parentElement.children]
-                // .filter(elem => elem.classList.contains("message"))[0]
             }
         }
 
@@ -133,7 +89,6 @@
             studentCount.innerHTML = parseInt(data.studentCount) === 1 ?
                 `<i class="fa-solid fa-person"></i> ${data.studentCount} Student Registered` : 
                 `<i class="fa-solid fa-person"></i> ${data.studentCount} Students Registered`;
-            // msg.textContent = `${data.message}`;
             if(data.state == 'ADDED') {
                 btn.className = 'cancelbooking btn bg-danger-subtle p-2'
                 btn.textContent = 'Cancel Booking';
@@ -149,25 +104,21 @@
             alertMessage.classList.toggle('hidden');
             alertMessage.textContent = data.message;
             confirmBtn.style.display = 'None'
-
             confirmMsg.textContent = ``;
         }
 
         const hideModal = () => {
-            overlay.classList.toggle('hidden');
+            overlay.classList.add('hidden');
             modal.style.display = 'none';
-            modal.classList.toggle('hidden');
+            modal.classList.add('hidden');
             alertMessage.textContent = '';
-            alertMessage.classList.toggle('hidden');
+            alertMessage.classList.add('hidden');
             confirmBtn.style.display = 'block';
-
         }
-
         availableClassesContainer.addEventListener('click', manageBookings);
         overlay.addEventListener('click', hideModal);
         closeBtn.addEventListener('click', hideModal);
         confirmBtn.addEventListener('click', sendData);    
-
     </script>
 
 {% endblock %}
