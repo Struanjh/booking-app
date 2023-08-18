@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% include 'sub_templates/__header.html' %}
+{% endblock %}
+
+{% block app_content %}
+{{ super() }}
+<h1 class="text-center">Sorry the page you're looking for was not found</h1>
+{% endblock %}

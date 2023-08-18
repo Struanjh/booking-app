@@ -29,9 +29,11 @@ def create_app(config_class=Config):
     from app.auth.routes import auth_bp
     from app.booking.routes import booking_bp
     from app.core.routes import core_bp
+    from app.errors.handlers import errors_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(booking_bp)
     app.register_blueprint(core_bp)
+    app.register_blueprint(errors_bp)
     return app
 
 #avoid circular imports
