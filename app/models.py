@@ -79,6 +79,27 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.email)
 
+    @staticmethod
+    def set_admin_user(app):
+        admin_email = app.config['ADMINS'][0]
+        admin_user = User.query.filter_by(email=admin_email).first()
+        if not admin_user:
+            user = User(
+                email=admin_email,
+                first_name='mr',
+                last_name='admin',
+                join_date=datetime.now(pytz.timezone(app.config['TZ_INFO'])),
+                oauth=False,
+                account_email_verified=True,
+                pw_last_set=datetime.now(pytz.timezone(app.config['TZ_INFO']))
+            )
+            user.set_password(app.config['ADMIN_PW'])
+            print('ADDED ADMIN USER')
+        if admin_user.role.role != 'admin':
+            admin_user.role.role = 'admin'
+            print('USER ROLE SET AS ADMIN')
+        print('ADMIN USER', admin_user)
+
 
 @login.user_loader
 def load_user(id):

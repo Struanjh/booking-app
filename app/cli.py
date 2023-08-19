@@ -1,13 +1,23 @@
 import click, os, time
 import pytz
 from app import db
-from app.models import EnglishClasses
+from app.models import EnglishClasses, User, Role
 from datetime import datetime, timedelta, timezone
 from flask import session
+from flask_migrate import Migrate, upgrade
 
 
 def register(app):        
     @app.cli.command()
+    def deploy():
+        """Run deployment tasks."""
+        # migrate database to latest revision
+        upgrade()
+
+        # set an admin user
+        User.set_admin_user(app)    
+
+
     def addclass():
         """Add Classes to DB at scheduled interval"""
         open_in_days = app.config['CLASSES_OPEN_IN_DAYS']

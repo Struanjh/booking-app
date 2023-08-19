@@ -13,7 +13,8 @@ class Config(object):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = ['struanet1@gmail.com']
+    ADMINS = ['struanfdd@gmail.com']
+    ADMIN_PW = os.environ.get('ADMIN_PW')
     OAUTH2_PROVIDERS = {
         # Google OAuth 2.0 documentation:
         # https://developers.google.com/identity/protocols/oauth2/web-server#httprest
