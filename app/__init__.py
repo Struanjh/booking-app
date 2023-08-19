@@ -1,5 +1,5 @@
 
-import logging
+import logging, os
 from logging.handlers import RotatingFileHandler
 from flask import Flask
 from config import config
@@ -38,19 +38,20 @@ def create_app(config_name):
     app.register_blueprint(booking_bp)
     app.register_blueprint(core_bp)
     app.register_blueprint(errors_bp)
-    ##PROD CONFIG
-    # if not app.debug:
-    #     if not os.path.exists('logs'):
-    #         os.mkdir('logs')
-    #     file_handler = RotatingFileHandler('logs/booking_app.log', maxBytes=10240,
-    #                                     backupCount=10)
-    #     file_handler.setFormatter(logging.Formatter(
-    #         '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-    #     file_handler.setLevel(logging.ERROR)
-    #     app.logger.addHandler(file_handler)
-
-    #     app.logger.setLevel(logging.INFO)
-    #     app.logger.info('Microblog startup')
+    #Enable debugging logging for prod
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/booking_app.log', maxBytes=10240,
+                                        backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            )
+        )
+        file_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.ERROR)
+        app.logger.info('Booking App startup')
     return app
 
 #avoid circular imports
